@@ -6,7 +6,17 @@ export default async function Home() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">📊 Dernières annonces</h2>
+      {/* <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">📊 Dernières annonces</h2>
+        <form action={triggerKermarrecScraper}>
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+          >
+            🚀 Lancer le scraper Kermarrec
+          </button>
+        </form>
+      </div> */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {annonces.map((annonce: any) => (
           <div
