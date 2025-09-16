@@ -6,52 +6,136 @@ export default async function Home() {
 
   return (
     <div>
-      {/* <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">📊 Dernières annonces</h2>
-        <form action={triggerKermarrecScraper}>
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-          >
-            🚀 Lancer le scraper Kermarrec
-          </button>
-        </form>
-      </div> */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {annonces.map((annonce: any) => (
-          <div
-            key={annonce.id}
-            className="border rounded-2xl shadow p-4 bg-white flex flex-col"
-          >
-            {annonce.photos?.length > 0 && (
-              <img
-                src={annonce.photos[0]}
-                alt={annonce.type}
-                className="rounded-xl w-full h-48 object-cover mb-3"
-              />
-            )}
+      <div className="mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
+          Dernières annonces
+        </h2>
+        <p className="text-gray-600 mt-1">
+          Explorez les opportunités immobilières récentes.
+        </p>
+      </div>
 
-            <h3 className="text-lg font-semibold mb-1">
-              {annonce.type} - {annonce.ville}
-            </h3>
-            <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-              {annonce.description || "Pas de description"}
-            </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        {annonces.map((annonce: any) => {
+          const imageUrl = annonce.photos?.[0] ?? "";
+          const prixFormate = formatPrix(annonce.prix);
+          const type = annonce.type ?? "Annonce";
+          const ville = annonce.ville ?? "";
 
-            <p className="font-bold text-indigo-600">{annonce.prix}</p>
-            <p className="text-sm text-gray-500">
-              {annonce.pieces} pièces • {annonce.surface} m²
-            </p>
-
-            <Link
-              href={`/annonce/${annonce.id}`}
-              className="mt-3 inline-block text-sm text-blue-600 hover:underline"
+          return (
+            <div
+              key={annonce.id}
+              className="group relative overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
             >
-              Voir le détail →
-            </Link>
-          </div>
-        ))}
+              <div className="relative">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={`${type} à ${ville}`}
+                    className="w-full aspect-[4/3] object-cover"
+                  />
+                ) : (
+                  <div className="w-full aspect-[4/3] bg-gradient-to-br from-indigo-100 to-indigo-200" />
+                )}
+
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+
+                <div className="absolute top-3 left-3 flex items-center gap-2">
+                  <span className="inline-flex items-center rounded-full bg-white/90 backdrop-blur px-3 py-1 text-xs font-medium text-gray-800 shadow-sm">
+                    {type}
+                  </span>
+                </div>
+
+                {annonce.agence && (
+                  <div className="absolute top-3 right-3">
+                    <span className="inline-flex items-center rounded-full bg-indigo-600 text-white px-3 py-1 text-xs font-medium shadow-sm">
+                      {annonce.agence}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {ville || type}
+                    </h3>
+                    <p className="mt-0.5 text-sm text-gray-500">{type}</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xl font-bold text-indigo-600">
+                      {prixFormate}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-gray-700">
+                  {isValidNumber(annonce.pieces) && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1">
+                      <span>🛏️</span>
+                      <span>{annonce.pieces} pièces</span>
+                    </span>
+                  )}
+                  {isValidNumber(annonce.surface) && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1">
+                      <span>📐</span>
+                      <span>{annonce.surface} m²</span>
+                    </span>
+                  )}
+                </div>
+
+                {annonce.description && (
+                  <p className="mt-3 text-sm text-gray-600 line-clamp-2">
+                    {annonce.description}
+                  </p>
+                )}
+
+                <div className="mt-4 flex items-center justify-between">
+                  <Link
+                    href={`/annonce/${annonce.id}`}
+                    className="inline-flex items-center rounded-full bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                  >
+                    Voir le détail
+                    <span className="ml-1">→</span>
+                  </Link>
+
+                  {annonce.ville && (
+                    <span className="text-xs text-gray-500">
+                      {annonce.ville}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
+}
+
+function isValidNumber(value: unknown) {
+  return typeof value === "number" && !Number.isNaN(value);
+}
+
+function formatPrix(prix: any) {
+  if (typeof prix === "number") {
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0,
+    }).format(prix);
+  }
+  if (typeof prix === "string") {
+    const numeric = Number(prix.replace(/[^0-9]/g, ""));
+    if (!Number.isNaN(numeric)) {
+      return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR",
+        maximumFractionDigits: 0,
+      }).format(numeric);
+    }
+  }
+  return prix ?? "Prix ND";
 }
