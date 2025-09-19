@@ -3,9 +3,10 @@ import { getAnnonceById } from "@/app/actions";
 export default async function AnnonceDetail({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const annonce = await getAnnonceById(params.id);
+  const { id } = await params;
+  const annonce = await getAnnonceById(id);
 
   if (!annonce) {
     return <p>Annonce introuvable.</p>;
