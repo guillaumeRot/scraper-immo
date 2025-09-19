@@ -1,12 +1,11 @@
-import { closeDb, initDb } from "./lib/db.js";
-import { kermarrecScraper } from "./scrapers/kermarrec.js";
+import { closeDb } from "./lib/db.js";
 
 (async () => {
   // console.log("--- Initialisation DB ---");
-  await initDb();
+  // Prisma s'initialise automatiquement
 
   console.log("--- Lancement des scrapers ---");
-  await kermarrecScraper();
+  // await kermarrecScraper(); // Fonction non implémentée
 
   console.log("--- Fermeture DB ---");
   await closeDb();
