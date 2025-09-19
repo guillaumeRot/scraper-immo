@@ -19,7 +19,7 @@ export default async function AnnonceDetail({
 
       {/* Carousel simple */}
       <div className="flex overflow-x-auto gap-4 mb-6">
-        {annonce.photos?.map((photo: string, idx: number) => (
+        {(annonce.photos as string[])?.map((photo: string, idx: number) => (
           <img
             key={idx}
             src={photo}
