@@ -1,19 +1,18 @@
-import pkg from "pg";
-const { Pool } = pkg;
+import { PrismaClient } from "@prisma/client";
 
-const pool = new Pool({
-  user: process.env.PGUSER,
-  host: process.env.PGHOST,
-  database: process.env.PGDATABASE,
-  password: process.env.PGPASSWORD,
-  port: Number(process.env.PGPORT),
-});
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 export async function closeDb() {
-  await pool.end();
+  await prisma.$disconnect();
 }
 
+// Fonction de compatibilité pour les requêtes SQL brutes si nécessaire
 export async function query(text: string, params?: any[]) {
-  const res = await pool.query(text, params);
-  return res;
+  return await prisma.$queryRawUnsafe(text, ...(params || []));
 }
