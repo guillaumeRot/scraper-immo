@@ -1,5 +1,11 @@
 import Link from "next/link";
 import { getAnnonces, getFiltersData } from "./actions";
+import RunScraperButton from "@/components/RunScraperButton";
+
+// const RunScraperButton = dynamic(
+//   () => import('@/components/RunScraperButton'),
+//   { ssr: false }
+// );
 
 export default async function Home({
   searchParams,
@@ -79,6 +85,8 @@ export default async function Home({
           </button>
         </div>
       </form>
+
+      <RunScraperButton />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
         {annonces.map((annonce: any) => {
