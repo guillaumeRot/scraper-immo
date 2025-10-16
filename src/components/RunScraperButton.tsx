@@ -5,58 +5,66 @@ import { useState } from 'react';
 export default function RunScraperButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [scraper, setScraper] = useState('all');
 
-  const handleRunScraper = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
-    setMessage('Lancement du scraper en cours...');
-    
+    setMessage('');
+    setError('');
+
     try {
       const response = await fetch('/api/run-scraper', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ scraper })
       });
 
-      // Vérifier le type de contenu de la réponse
-      const contentType = response.headers.get('content-type');
-      let result;
+      const data = await response.json();
       
-      if (contentType && contentType.includes('application/json')) {
-        result = await response.json();
+      if (response.ok) {
+        setMessage(`Scraping ${scraper === 'all' ? 'de tous les scrapers' : `du scraper ${scraper}`} terminé avec succès !`);
       } else {
-        const text = await response.text();
-        result = { success: response.ok, message: text };
+        throw new Error(data.error || 'Erreur lors du scraping');
       }
-      
-      if (!response.ok) {
-        throw new Error(result.error || result.message || 'Erreur lors du lancement du scraper');
-      }
-
-      setMessage(result.message || 'Scraper lancé avec succès !');
-    } catch (error) {
-      console.error('Erreur lors du lancement du scraper:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      setMessage(`Erreur: ${errorMessage}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur inconnue est survenue');
+      console.error('Erreur:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="mt-4">
-      <button
-        onClick={handleRunScraper}
-        disabled={isLoading}
-        className={`px-4 py-2 rounded-md text-white font-medium ${
-          isLoading
-            ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-blue-600 hover:bg-blue-700'
-        }`}
-      >
-        {isLoading ? 'Chargement...' : 'Lancer le scraper'}
-      </button>
-      {message && <p className="mt-2 text-sm text-gray-600">{message}</p>}
-    </div>
+    <form onSubmit={handleSubmit} className="flex flex-col items-start gap-2">
+      <div className="flex items-center gap-2">
+        <select
+          value={scraper}
+          onChange={(e) => setScraper(e.target.value)}
+          disabled={isLoading}
+          className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-2"
+        >
+          <option value="all">Tous les scrapers</option>
+          <option value="immonot">Immonot</option>
+          <option value="kermarrec">Kermarrec</option>
+        </select>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className={`px-4 py-2 rounded-md text-white font-medium ${
+            isLoading
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-indigo-600 hover:bg-indigo-700'
+          }`}
+        >
+          {isLoading ? 'Chargement...' : 'Lancer le scraping'}
+        </button>
+      </div>
+      {message && <p className="text-sm text-green-600">{message}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+    </form>
   );
 }

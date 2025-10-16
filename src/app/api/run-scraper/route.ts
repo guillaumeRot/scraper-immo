@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const response = await fetch('https://immo-scanner-scraper-guillaumerot6122-pcw8vwdygmnc2g.leapcell-async.dev/run-scrapers', {
+    const { scraper } = await request.json();
+    let url = 'https://immo-scanner-scraper-guillaumerot6122-pcw8vwdygmnc2g.leapcell-async.dev/run-scrapers';
+    
+    // Ajouter le paramètre scraper à l'URL si spécifié et différent de 'all'
+    if (scraper && scraper !== 'all') {
+      url += `?scraper=${encodeURIComponent(scraper)}`;
+    }
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
