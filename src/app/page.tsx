@@ -38,13 +38,18 @@ export default async function Home({
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
-          Dernières annonces
-        </h2>
-        <p className="text-gray-600 mt-1">
-          Explorez les opportunités immobilières récentes.
-        </p>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
+            Dernières annonces
+          </h2>
+          <p className="text-gray-600 mt-1">
+            Explorez les opportunités immobilières récentes.
+          </p>
+        </div>
+        <div className="self-end">
+          <RunScraperButton />
+        </div>
       </div>
 
       <form
@@ -128,8 +133,6 @@ export default async function Home({
           </div>
         </div>
       </form>
-
-      <RunScraperButton />
 
       <div className="grid grid-cols-1 gap-6 lg:gap-8">
         {/* Sur mobile : 1 colonne, sur tablette : 1 colonne, sur desktop : 1 colonne pleine largeur */}
