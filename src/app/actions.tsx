@@ -3,7 +3,17 @@
 import { prisma } from "@/lib/db";
 
 // Liste des annonces avec filtres optionnels
-export async function getAnnonces(filters?: { ville?: string; type?: string }) {
+type SortField = 'date_scraped' | 'created_at' | 'prix';
+type SortOrder = 'asc' | 'desc';
+
+export async function getAnnonces(
+  filters?: { 
+    ville?: string; 
+    type?: string;
+    sortBy?: SortField;
+    sortOrder?: SortOrder;
+  }
+) {
   const where: any = {};
   if (filters?.ville && filters.ville.trim().length > 0) {
     where.ville = { contains: filters.ville.trim(), mode: "insensitive" };
@@ -11,6 +21,9 @@ export async function getAnnonces(filters?: { ville?: string; type?: string }) {
   if (filters?.type && filters.type.trim().length > 0) {
     where.type = { equals: filters.type.trim(), mode: "insensitive" };
   }
+
+  const sortField = filters?.sortBy || 'date_scraped';
+  const sortOrder = filters?.sortOrder || 'desc';
 
   const annonces = await prisma.annonce.findMany({
     where,
@@ -25,9 +38,11 @@ export async function getAnnonces(filters?: { ville?: string; type?: string }) {
       agence: true,
       description: true,
       photos: true,
+      date_scraped: true,
+      created_at: true
     },
     orderBy: {
-      date_scraped: "desc",
+      [sortField]: sortOrder,
     },
     take: 50,
   });
