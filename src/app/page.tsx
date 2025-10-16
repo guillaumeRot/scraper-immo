@@ -8,8 +8,6 @@ type SortOption = {
 };
 
 const SORT_OPTIONS: SortOption[] = [
-  { value: 'date_scraped-desc', label: 'Date de scraping (récents d\'abord)' },
-  { value: 'date_scraped-asc', label: 'Date de scraping (plus anciens d\'abord)' },
   { value: 'created_at-desc', label: 'Date de création (récents d\'abord)' },
   { value: 'created_at-asc', label: 'Date de création (plus anciens d\'abord)' },
   { value: 'prix-asc', label: 'Prix (croissant)' },
@@ -25,7 +23,7 @@ export default async function Home({
     sort?: string;
   }>;
 }) {
-  const { ville = "", type = "", sort = 'date_scraped-desc' } = await searchParams;
+  const { ville = "", type = "", sort = 'created_at-desc' } = await searchParams;
   const [sortBy, sortOrder] = sort.split('-').slice(-2) as [string, 'asc' | 'desc'];
   
   const [annonces, filters] = await Promise.all([
@@ -133,7 +131,8 @@ export default async function Home({
 
       <RunScraperButton />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 gap-6 lg:gap-8">
+        {/* Sur mobile : 1 colonne, sur tablette : 1 colonne, sur desktop : 1 colonne pleine largeur */}
         {annonces.map((annonce: any) => {
           const imageUrl = annonce.photos?.[0] ?? "";
           const prixFormate = formatPrix(annonce.prix);
@@ -143,17 +142,17 @@ export default async function Home({
           return (
             <div
               key={annonce.id}
-              className="group relative overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+              className="group relative overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 lg:max-w-6xl lg:mx-auto w-full lg:flex"
             >
-              <div className="relative">
+              <div className="relative lg:w-1/3 flex-shrink-0">
                 {imageUrl ? (
                   <img
                     src={imageUrl}
                     alt={`${type} à ${ville}`}
-                    className="w-full aspect-[4/3] object-cover"
+                    className="w-full h-full object-cover lg:object-cover lg:absolute lg:inset-0"
                   />
                 ) : (
-                  <div className="w-full aspect-[4/3] bg-gradient-to-br from-indigo-100 to-indigo-200" />
+                  <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-indigo-200" />
                 )}
 
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
@@ -173,7 +172,7 @@ export default async function Home({
                 )}
               </div>
 
-              <div className="p-4 sm:p-5">
+              <div className="p-4 sm:p-5 lg:w-2/3 flex flex-col">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">

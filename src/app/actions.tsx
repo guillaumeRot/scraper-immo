@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 
 // Liste des annonces avec filtres optionnels
-type SortField = 'date_scraped' | 'created_at' | 'prix';
+type SortField = 'created_at' | 'prix';
 type SortOrder = 'asc' | 'desc';
 
 export async function getAnnonces(
