@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { getAnnonces, getFiltersData } from "./actions";
 import RunScraperButton from "@/components/RunScraperButton";
+import ImageCarousel from "@/components/ImageCarousel";
+import Link from 'next/link';
 
 type SortOption = {
   value: string;
@@ -135,7 +136,6 @@ export default async function Home({
       </form>
 
       <div className="grid grid-cols-1 gap-6 lg:gap-8">
-        {/* Sur mobile : 1 colonne, sur tablette : 1 colonne, sur desktop : 1 colonne pleine largeur */}
         {annonces.map((annonce: any) => {
           const imageUrl = annonce.photos?.[0] ?? "";
           const prixFormate = formatPrix(annonce.prix);
@@ -147,33 +147,24 @@ export default async function Home({
               key={annonce.id}
               className="group relative overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 lg:max-w-6xl lg:mx-auto w-full lg:flex"
             >
-              <div className="relative lg:w-1/3 flex-shrink-0">
-                {imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt={`${type} à ${ville}`}
-                    className="w-full h-full object-cover lg:object-cover lg:absolute lg:inset-0"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-indigo-100 to-indigo-200" />
-                )}
+              <div className="lg:w-1/3 flex-shrink-0">
+                <ImageCarousel images={annonce.photos || []} />
+              </div>
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
 
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+              <div className="absolute top-3 left-3 flex items-center gap-2">
+                <span className="inline-flex items-center rounded-full bg-white/90 backdrop-blur px-3 py-1 text-xs font-medium text-gray-800 shadow-sm">
+                  {type}
+                </span>
+              </div>
 
-                <div className="absolute top-3 left-3 flex items-center gap-2">
-                  <span className="inline-flex items-center rounded-full bg-white/90 backdrop-blur px-3 py-1 text-xs font-medium text-gray-800 shadow-sm">
-                    {type}
+              {annonce.agence && (
+                <div className="absolute top-3 right-36">
+                  <span className="inline-flex items-center rounded-full bg-indigo-600 text-white px-3 py-1 text-xs font-medium shadow-sm">
+                    {annonce.agence}
                   </span>
                 </div>
-
-                {annonce.agence && (
-                  <div className="absolute top-3 right-3">
-                    <span className="inline-flex items-center rounded-full bg-indigo-600 text-white px-3 py-1 text-xs font-medium shadow-sm">
-                      {annonce.agence}
-                    </span>
-                  </div>
-                )}
-              </div>
+              )}
 
               <div className="p-4 sm:p-5 lg:w-2/3 flex flex-col">
                 <div className="flex items-start justify-between gap-3">
