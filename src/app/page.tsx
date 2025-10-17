@@ -158,15 +158,14 @@ export default async function Home({
                 </span>
               </div>
 
-              {annonce.agence && (
-                <div className="absolute top-3 right-36">
-                  <span className="inline-flex items-center rounded-full bg-indigo-600 text-white px-3 py-1 text-xs font-medium shadow-sm">
-                    {annonce.agence}
-                  </span>
-                </div>
-              )}
-
               <div className="p-4 sm:p-5 lg:w-2/3 flex flex-col">
+                {annonce.agence && (
+                  <div className="mb-3">
+                    <span className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 px-3 py-1 text-xs font-medium">
+                      {annonce.agence}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">
