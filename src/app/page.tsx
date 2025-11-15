@@ -1,5 +1,4 @@
 import { getAnnonces, getFiltersData } from "./actions";
-import RunScraperButton from "@/components/RunScraperButton";
 import ImageCarousel from "@/components/ImageCarousel";
 import Link from 'next/link';
 
@@ -47,9 +46,6 @@ export default async function Home({
           <p className="text-gray-600 mt-1">
             Explorez les opportunités immobilières récentes.
           </p>
-        </div>
-        <div className="self-end">
-          <RunScraperButton />
         </div>
       </div>
 
