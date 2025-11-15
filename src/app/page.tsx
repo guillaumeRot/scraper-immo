@@ -159,71 +159,76 @@ export default async function Home({
               </div>
 
               <div className="p-4 sm:p-5 lg:w-2/3 flex flex-col">
-                {annonce.agence && (
-                  <div className="mb-3">
-                    <span className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 px-3 py-1 text-xs font-medium">
-                      {annonce.agence}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-start justify-between gap-3">
+                {/* Header: Type et Ville à gauche, Prix à droite */}
+                <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {ville || type}
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      {type}
                     </h3>
-                    <p className="mt-0.5 text-sm text-gray-500">{type}</p>
+                    <p className="text-sm text-gray-600">{ville}</p>
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-bold text-indigo-600">
+                    <div className="text-2xl font-bold text-indigo-600">
                       {prixFormate}
                     </div>
-                    {annonce.created_at && (
+                    {annonce.prix && annonce.prix.includes('+') && (
                       <div className="text-xs text-gray-500 mt-1">
-                        {new Date(annonce.created_at).toLocaleDateString('fr-FR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                        })}
+                        {annonce.prix}
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-gray-700">
+                {/* Description */}
+                {annonce.description && (
+                  <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-grow">
+                    {annonce.description}
+                  </p>
+                )}
+
+                {/* Propriétés */}
+                <div className="flex flex-wrap gap-2 mb-4">
                   {isValidNumber(annonce.pieces) && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-sm">
                       <span>🛏️</span>
                       <span>{annonce.pieces} pièces</span>
                     </span>
                   )}
                   {isValidNumber(annonce.surface) && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-sm">
                       <span>📐</span>
                       <span>{annonce.surface} m²</span>
                     </span>
                   )}
                 </div>
 
-                {annonce.description && (
-                  <p className="mt-3 text-sm text-gray-600 line-clamp-2">
-                    {annonce.description}
-                  </p>
-                )}
-
-                <div className="mt-4 flex items-center justify-between">
-                  <Link
-                    href={`/annonce/${annonce.id}`}
-                    className="inline-flex items-center rounded-full bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
-                  >
-                    Voir le détail
-                    <span className="ml-1">→</span>
-                  </Link>
-
-                  {annonce.ville && (
-                    <span className="text-xs text-gray-500">
-                      {annonce.ville}
-                    </span>
-                  )}
+                {/* Footer: Agence à gauche, Date à droite */}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                  <div className="flex items-center gap-2">
+                    {annonce.agence && (
+                      <span className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 px-3 py-1 text-xs font-medium">
+                        {annonce.agence}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {annonce.created_at && (
+                      <span className="text-xs text-gray-500">
+                        {new Date(annonce.created_at).toLocaleDateString('fr-FR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    )}
+                    <Link
+                      href={`/annonce/${annonce.id}`}
+                      className="inline-flex items-center rounded-full bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                    >
+                      Voir le détail
+                      <span className="ml-1">→</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
