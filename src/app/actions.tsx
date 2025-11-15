@@ -96,3 +96,17 @@ export async function getFiltersData() {
       .filter((t): t is string => Boolean(t && t.trim().length > 0)),
   };
 }
+
+// Agences distinctes pour le scanner
+export async function getAgences() {
+  const agences = await prisma.annonce.findMany({
+    distinct: ["agence"],
+    select: { agence: true },
+    where: { agence: { not: "" } },
+    orderBy: { agence: "asc" },
+  });
+
+  return agences
+    .map((a) => a.agence)
+    .filter((a): a is string => Boolean(a && a.trim().length > 0));
+}
