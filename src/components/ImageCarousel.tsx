@@ -16,7 +16,7 @@ export default function ImageCarousel({ images }: { images: string[] }) {
 
   if (!images || images.length === 0) {
     return (
-      <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+      <div className="w-full h-72 bg-gray-100 flex items-center justify-center">
         <span className="text-gray-400">Aucune image disponible</span>
       </div>
     );
@@ -30,7 +30,7 @@ export default function ImageCarousel({ images }: { images: string[] }) {
             <img
               src={image}
               alt={`Image ${index + 1}`}
-              className="w-full h-48 lg:h-full object-cover"
+              className="w-full h-72 object-cover"
               loading="lazy"
             />
           </div>
