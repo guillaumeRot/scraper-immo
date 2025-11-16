@@ -22,9 +22,16 @@ export default async function AnnonceDetail({
         
         <div className="flex-1">
           <div className="flex justify-between items-start mb-4">
-            <h2 className="text-2xl font-bold">
-              {annonce.type} - {annonce.ville}
-            </h2>
+            <div>
+              <h2 className="text-2xl font-bold">
+                {annonce.type} - {annonce.ville}
+              </h2>
+              {annonce.surface && (
+                <p className="text-sm text-gray-600 mt-1">
+                  {annonce.surface} m²
+                </p>
+              )}
+            </div>
             <div className="text-right">
               <p className="text-2xl font-semibold text-indigo-600">
                 {annonce.prix ? annonce.prix.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " €" : "Prix non disponible"}
@@ -34,16 +41,10 @@ export default async function AnnonceDetail({
                   ({Math.round(parseInt(annonce.prix.replace(/[^\d]/g, "")) / parseFloat(annonce.surface)).toLocaleString("fr-FR")} €/m²)
                 </p>
               )}
-              {annonce.surface && (
-                <p className="text-sm text-gray-600 mt-2">
-                  {annonce.surface} m²
-                </p>
-              )}
             </div>
           </div>
 
-          <div className="mt-4">
-            <h3 className="font-semibold mb-2">Description</h3>
+          <div className="mt-8">
             <p className="text-gray-700">{annonce.description}</p>
           </div>
 
