@@ -38,17 +38,6 @@ export default async function Home({
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
-            Dernières annonces
-          </h2>
-          <p className="text-gray-600 mt-1">
-            Explorez les opportunités immobilières récentes.
-          </p>
-        </div>
-      </div>
-
       <form
         action="/"
         method="GET"
@@ -141,7 +130,7 @@ export default async function Home({
           return (
             <div
               key={annonce.id}
-              className="group relative overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 lg:max-w-6xl lg:mx-auto w-full lg:flex h-72"
+              className="group relative overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 lg:mx-auto w-full lg:flex h-72"
             >
               <div className="lg:w-1/3 flex-shrink-0 h-72">
                 <ImageCarousel images={annonce.photos || []} />
