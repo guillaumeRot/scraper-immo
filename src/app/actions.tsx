@@ -66,6 +66,8 @@ export async function getAnnonceById(id: string) {
       agence: true,
       description: true,
       photos: true,
+      dpe: true,
+      ges: true,
     },
   });
   return annonce;
@@ -109,4 +111,12 @@ export async function getAgences() {
   return agences
     .map((a) => a.agence)
     .filter((a): a is string => Boolean(a && a.trim().length > 0));
+}
+
+// Récupérer tous les scans
+export async function getScans() {
+  const scans = await prisma.scan.findMany({
+    orderBy: { date_scan: "desc" },
+  });
+  return scans;
 }

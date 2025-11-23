@@ -1,4 +1,5 @@
 import ImageSlider from "@/components/ImageSlider";
+import { EnergyLabels } from "@/components/EnergyLabel";
 import { getAnnonceById } from "@/app/actions";
 
 export default async function AnnonceDetail({
@@ -17,10 +18,13 @@ export default async function AnnonceDetail({
 
   return (
     <div>
-      <div className="flex gap-8">
-        <ImageSlider photos={photos} />
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="w-full md:w-1/2">
+          <ImageSlider photos={photos} />
+          <EnergyLabels dpe={annonce.dpe} ges={annonce.ges} />
+        </div>
         
-        <div className="flex-1">
+        <div className="w-full md:w-1/2">
           <div className="flex justify-between items-start mb-4">
             <div>
               <h2 className="text-2xl font-bold">

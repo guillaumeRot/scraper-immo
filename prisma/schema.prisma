@@ -18,8 +18,21 @@ model Annonce {
   description  String?
   photos       Json?
   agence       String   @db.VarChar(100)
+  dpe          String?  @db.VarChar(1)
+  ges          String?  @db.VarChar(1)
   created_at   DateTime @default(now())
   date_scraped DateTime @default(now())
+}
+
+model Scan {
+  id            Int      @id @default(autoincrement())
+  scraper       String   @db.VarChar(100)
+  date_scan     DateTime @default(now())
+  status        String   @default("completed") @db.VarChar(50)
+  annonces_count Int     @default(0)
+  erreurs_count Int     @default(0)
+  duree_ms      Int?
+  @@unique([scraper])
 }
 
 
