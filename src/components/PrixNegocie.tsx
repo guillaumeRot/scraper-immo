@@ -39,9 +39,12 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
     ? Math.round(parseInt(prixAAfficher.replace(/\D/g, '')) / parseFloat(surface))
     : null;
 
-  return (
-    <div className="space-y-2">
+  const fraisNotaire = prixAAfficher 
+    ? Math.round(parseInt(prixAAfficher.replace(/\D/g, '')) * 0.08)
+    : 0;
 
+  return (
+    <div className="space-y-4">
       {/* Prix négocié */}
       <div>
         <div className="flex items-center gap-2">
@@ -104,6 +107,26 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
                 {Math.round((1 - parseInt(prixNegocie.replace(/\D/g, '')) / parseInt(prixInitial.replace(/\D/g, ''))) * 100)}% de réduction
               </span>
             )}
+          </div>
+        )}
+      </div>
+
+      {/* Frais de notaire */}
+      <div className="pt-4 border-t border-gray-200 mt-4">
+        <div className="flex justify-between items-center">
+          <span className="font-medium">Frais de notaire (8%) :</span>
+          <span className="text-lg font-semibold text-indigo-600">
+            {fraisNotaire.toLocaleString('fr-FR')} €
+          </span>
+        </div>
+        
+        {/* Coût total */}
+        {prixNegocie && (
+          <div className="mt-2 flex justify-between items-center text-sm text-gray-600">
+            <span>Coût total :</span>
+            <span className="font-medium">
+              {(parseInt(prixAAfficher.replace(/\D/g, '')) + fraisNotaire).toLocaleString('fr-FR')} €
+            </span>
           </div>
         )}
       </div>
