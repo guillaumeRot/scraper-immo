@@ -225,13 +225,26 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
       {/* Mensualité sur 20 ans */}
       <div className="pt-4 border-t border-gray-200 mt-4">
         <div className="flex justify-between items-center">
-          <div>
-            <h4 className="font-medium text-gray-700">Mensualité (20 ans à 3.5%)</h4>
-            <p className="text-xs text-gray-500">Montant à financer sur 240 mois</p>
+          <div className="w-full">
+            <div className="flex justify-between items-center mb-2">
+              <div>
+                <h4 className="font-medium text-gray-700">Mensualité (20 ans à 3.5%)</h4>
+                <p className="text-xs text-gray-500">Montant à financer sur 240 mois</p>
+              </div>
+              <span className="text-lg font-semibold text-indigo-600">
+                {mensualite20ans.toLocaleString('fr-FR')} €/mois
+              </span>
+            </div>
+            <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+              <div>
+                <h4 className="text-sm font-medium text-gray-700">Mensualité + assurance</h4>
+                <p className="text-xs text-gray-500">Mensualité + 50€ d'assurance</p>
+              </div>
+              <span className="text-lg font-semibold text-indigo-600">
+                {(mensualite20ans + 50).toLocaleString('fr-FR')} €/mois
+              </span>
+            </div>
           </div>
-          <span className="text-lg font-semibold text-indigo-600">
-            {mensualite20ans.toLocaleString('fr-FR')} €/mois
-          </span>
         </div>
       </div>
     </div>
