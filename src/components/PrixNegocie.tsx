@@ -42,6 +42,22 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
   const fraisNotaire = prixAAfficher 
     ? Math.round(parseInt(prixAAfficher.replace(/\D/g, '')) * 0.08)
     : 0;
+    
+  // Fonction pour calculer la mensualité (taux annuel de 3.5%)
+  const calculerMensualite = (montant: number, annees: number) => {
+    const tauxMensuel = 0.035 / 12; // Taux mensuel
+    const nbMensualites = annees * 12;
+    
+    // Formule de calcul d'une mensualité : M = C * (t*(1+t)^n) / ((1+t)^n - 1)
+    const mensualite = (montant * tauxMensuel * Math.pow(1 + tauxMensuel, nbMensualites)) / 
+                      (Math.pow(1 + tauxMensuel, nbMensualites) - 1);
+    
+    return Math.round(mensualite);
+  };
+  
+  // Calcul de la mensualité sur 20 ans
+  const montantTotal = prixAAfficher ? parseInt(prixAAfficher.replace(/\D/g, '')) + fraisNotaire : 0;
+  const mensualite20ans = montantTotal > 0 ? calculerMensualite(montantTotal, 20) : 0;
 
   return (
     <div className="space-y-4">
@@ -129,6 +145,19 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
             </span>
           </div>
         )}
+      </div>
+
+      {/* Mensualité sur 20 ans */}
+      <div className="pt-4 border-t border-gray-200 mt-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h4 className="font-medium text-gray-700">Mensualité (20 ans à 3.5%)</h4>
+            <p className="text-xs text-gray-500">Prix + frais de notaire</p>
+          </div>
+          <span className="text-lg font-semibold text-indigo-600">
+            {mensualite20ans.toLocaleString('fr-FR')} €/mois
+          </span>
+        </div>
       </div>
     </div>
   );
