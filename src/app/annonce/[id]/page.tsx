@@ -1,6 +1,7 @@
 import ImageSlider from "@/components/ImageSlider";
 import { EnergyLabels } from "@/components/EnergyLabel";
 import { getAnnonceById } from "@/app/actions";
+import PrixNegocie from "@/components/PrixNegocie";
 
 export default async function AnnonceDetail({
   params,
@@ -49,16 +50,26 @@ export default async function AnnonceDetail({
           </div>
 
           <div className="mt-8">
-            <p className="text-gray-700">{annonce.description}</p>
-          </div>
+            <p className="text-gray-700 mb-6">{annonce.description}</p>
 
-          <a
-            href={annonce.lien}
-            target="_blank"
-            className="mt-6 inline-block text-sm text-blue-600 hover:underline"
-          >
-            Voir l'annonce originale →
-          </a>
+            <a
+              href={annonce.lien}
+              target="_blank"
+              className="mt-6 inline-block text-sm text-blue-600 hover:underline"
+            >
+              Voir l'annonce originale →
+            </a>
+            
+            {annonce.prix && (
+              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Simulation</h3>
+                <PrixNegocie 
+                  prixInitial={annonce.prix} 
+                  surface={annonce.surface || undefined} 
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
