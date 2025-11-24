@@ -67,16 +67,6 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
-                  Dernières annonces
-                </h2>
-                <p className="text-gray-600 mt-1">
-                  Explorez les opportunités immobilières récentes.
-                </p>
-              </div>
-            </div>
           </div>
         )}
         {isSidebarOpen && children}

@@ -38,6 +38,15 @@ export default async function Home({
 
   return (
     <div>
+      <div className="mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
+          Dernières annonces
+        </h2>
+        <p className="text-gray-600 mt-1">
+          Explorez les opportunités immobilières récentes.
+        </p>
+      </div>
+
       <form
         action="/"
         method="GET"
