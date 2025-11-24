@@ -27,7 +27,7 @@ export function LoyerEstime({ loyerMensuel, onLoyerChange, prixNegocie }: LoyerE
   };
 
   return (
-    <div className="mt-4 pt-3 border-t border-gray-100">
+    <div>
       <div className="flex items-center gap-2">
         <span className="font-medium">Loyer estimé :</span>
         {isEditing ? (

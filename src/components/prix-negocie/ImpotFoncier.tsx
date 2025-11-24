@@ -1,17 +1,17 @@
 import { useState, KeyboardEvent } from 'react';
 
-interface ApportInputProps {
-  apport: string;
-  onApportChange: (value: string) => void;
+interface ImpotFoncierProps {
+  montant: string;
+  onMontantChange: (value: string) => void;
 }
 
-export function ApportInput({ apport, onApportChange }: ApportInputProps) {
+export function ImpotFoncier({ montant, onMontantChange }: ImpotFoncierProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
   const handleSave = () => {
     if (inputValue) {
-      onApportChange(inputValue.replace(/\D/g, ''));
+      onMontantChange(inputValue.replace(/\D/g, ''));
     }
     setIsEditing(false);
   };
@@ -28,7 +28,7 @@ export function ApportInput({ apport, onApportChange }: ApportInputProps) {
   return (
     <div>
       <div className="flex items-center gap-2">
-        <span className="font-medium">Apport :</span>
+        <span className="font-medium">Impôt foncier :</span>
         {isEditing ? (
           <div className="flex items-center gap-2">
             <input
@@ -38,10 +38,10 @@ export function ApportInput({ apport, onApportChange }: ApportInputProps) {
               onKeyDown={handleKeyDown}
               onBlur={handleSave}
               className="w-24 px-2 py-1 border rounded text-right"
-              placeholder={apport}
+              placeholder={montant || '0'}
               autoFocus
             />
-            <span>€</span>
+            <span>€/an</span>
             <button
               onClick={handleSave}
               className="text-sm bg-indigo-100 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-200"
@@ -53,12 +53,12 @@ export function ApportInput({ apport, onApportChange }: ApportInputProps) {
           <div 
             className="inline-flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded"
             onClick={() => {
-              setInputValue(apport);
+              setInputValue(montant);
               setIsEditing(true);
             }}
           >
             <span className="text-indigo-600 font-medium">
-              {parseInt(apport).toLocaleString('fr-FR')} €
+              {montant ? `${parseInt(montant).toLocaleString('fr-FR')} €/an` : 'Définir'}
             </span>
             <svg 
               xmlns="http://www.w3.org/2000/svg" 

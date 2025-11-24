@@ -6,6 +6,7 @@ import { LoyerEstime } from './prix-negocie/LoyerEstime';
 import { ApportInput } from './prix-negocie/ApportInput';
 import { FraisNotaire } from './prix-negocie/FraisNotaire';
 import { Mensualite } from './prix-negocie/Mensualite';
+import { ImpotFoncier } from './prix-negocie/ImpotFoncier';
 
 interface PrixNegocieProps {
   prixInitial: string;
@@ -16,6 +17,7 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
   const [prixNegocie, setPrixNegocie] = useState<string | null>(null);
   const [apport, setApport] = useState('20000');
   const [loyerMensuel, setLoyerMensuel] = useState('');
+  const [impotFoncier, setImpotFoncier] = useState('1000');
 
   // Calcul des valeurs dérivées
   const prixAAfficher = prixNegocie || prixInitial;
@@ -66,12 +68,19 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
         />
       </div>
 
-      {/* Loyer estimé */}
-      <LoyerEstime 
-        loyerMensuel={loyerMensuel}
-        onLoyerChange={setLoyerMensuel}
-        prixNegocie={prixAAfficher}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Loyer estimé */}
+        <LoyerEstime 
+          loyerMensuel={loyerMensuel}
+          onLoyerChange={setLoyerMensuel}
+          prixNegocie={prixAAfficher}
+        />
+        {/* Impôt foncier */}
+        <ImpotFoncier 
+          montant={impotFoncier}
+          onMontantChange={setImpotFoncier}
+        />
+      </div>
 
       {/* Frais de notaire et coût total */}
       <FraisNotaire 
