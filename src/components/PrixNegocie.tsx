@@ -33,7 +33,7 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
     : 0;
 
   const coutTotal = prixAAfficher 
-    ? prixNumerique + fraisNotaire
+    ? prixNumerique + fraisNotaire - apportNumerique
     : 0;
 
   // Calcul du taux d'intérêt (exemple: 3.5%)
@@ -94,6 +94,7 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
         taux={tauxInteret}
         apport={apport}
         prixNegocie={prixAAfficher}
+        fraisNotaire={fraisNotaire}
       />
     </div>
   );

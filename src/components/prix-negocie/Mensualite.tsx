@@ -3,12 +3,13 @@ interface MensualiteProps {
   taux: number;
   apport: string;
   prixNegocie: string | null;
+  fraisNotaire: number;
 }
 
-export function Mensualite({ mensualite, taux, apport, prixNegocie }: MensualiteProps) {
+export function Mensualite({ mensualite, taux, apport, prixNegocie, fraisNotaire }: MensualiteProps) {
   const apportNumerique = parseInt(apport.replace(/\D/g, '')) || 0;
   const prixNumerique = prixNegocie ? parseInt(prixNegocie.replace(/\D/g, '')) : 0;
-  const montantEmprunte = prixNumerique - apportNumerique;
+  const montantEmprunte = Math.max(0, (prixNumerique + fraisNotaire) - apportNumerique);
 
   return (
     <div className="pt-4 border-t border-gray-200 mt-4">
