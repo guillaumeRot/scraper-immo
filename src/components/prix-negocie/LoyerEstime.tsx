@@ -87,7 +87,7 @@ export function LoyerEstime({ loyerMensuel, onLoyerChange, coutTotal, impotFonci
         )}
         {loyerMensuel && coutTotal && coutTotal > 0 && impotFoncier && (
           <p className="text-xs text-gray-500">
-            Rendement net: {(((parseInt(loyerMensuel) * 12 - impotFoncier) / coutTotal) * 100).toFixed(2)}%
+            Rendement net: {((parseInt(loyerMensuel) * 12 - impotFoncier) / coutTotal * 100).toFixed(2)}%
           </p>
         )}
       </div>
