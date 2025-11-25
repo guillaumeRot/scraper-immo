@@ -8,8 +8,16 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen relative">
-      {/* Sidebar - position absolue quand fermée */}
-      <aside className={`${isSidebarOpen ? "w-64 relative" : "w-0 absolute"} bg-white shadow-md transition-all duration-300 ease-in-out overflow-hidden z-10`}>
+      {/* Overlay pour fermer la sidebar au clic */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <aside className={`fixed md:relative h-screen ${isSidebarOpen ? 'w-64' : 'w-0 md:w-20'} bg-white shadow-md transition-all duration-300 ease-in-out overflow-hidden z-30`}>
         <div className="p-6 min-w-[16rem]">
           <div className="flex items-center justify-between">
             <Link href="/" className="inline-block">
@@ -36,6 +44,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             <li>
               <Link 
                 href="/" 
+                onClick={() => setIsSidebarOpen(false)}
                 className="flex items-center w-full text-left px-4 py-2 rounded-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 font-medium transition-colors"
               >
                 <span className="text-lg">📊</span>
@@ -45,6 +54,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             <li>
               <Link 
                 href="/scanner" 
+                onClick={() => setIsSidebarOpen(false)}
                 className="flex items-center w-full text-left px-4 py-2 rounded-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 font-medium transition-colors"
               >
                 <span className="text-lg">🔍</span>
@@ -56,21 +66,19 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main content */}
-      <main className={`flex-1 p-6 ${isSidebarOpen ? "max-w-5xl" : "max-w-7xl"} w-full transition-all duration-300 ease-in-out mx-auto`}>
-        {!isSidebarOpen && (
-          <div className="flex items-center gap-4 mb-4">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="text-gray-600 hover:text-indigo-600 transition-colors p-2 rounded-md hover:bg-indigo-50 bg-white shadow-md"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-        )}
-        {isSidebarOpen && children}
-        {!isSidebarOpen && children}
+      <main className={`flex-1 p-6 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>
+        {/* Bouton de menu pour mobile */}
+        <div className="md:hidden mb-4">
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="text-gray-600 hover:text-indigo-600 transition-colors p-2 rounded-md hover:bg-indigo-50 bg-white shadow-md"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+        {children}
       </main>
     </div>
   );
