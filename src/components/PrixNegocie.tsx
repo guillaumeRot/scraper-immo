@@ -98,6 +98,7 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
           apport={apport}
           prixNegocie={prixAAfficher}
           fraisNotaire={fraisNotaire}
+          loyerMensuel={loyerMensuel}
         />
         
         {/* Cashflow mensuel */}
