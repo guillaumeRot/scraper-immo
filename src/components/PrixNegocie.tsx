@@ -42,7 +42,7 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
   const dureeAnnees = 20;
   const nbMensualites = dureeAnnees * 12;
   
-  const montantEmprunte = Math.max(0, prixNumerique - apportNumerique);
+  const montantEmprunte = Math.max(0, prixNumerique + fraisNotaire - apportNumerique);
   
   const mensualite = montantEmprunte > 0
     ? (montantEmprunte * tauxMensuel * Math.pow(1 + tauxMensuel, nbMensualites)) / 
