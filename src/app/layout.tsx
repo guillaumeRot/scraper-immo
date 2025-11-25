@@ -1,4 +1,5 @@
 import Sidebar from "@/components/Sidebar";
+import { SearchProvider } from "@/context/SearchContext";
 import "./globals.css";
 
 export const metadata = {
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className="bg-gray-50 text-gray-900">
-        <Sidebar>{children}</Sidebar>
+        <SearchProvider>
+          <Sidebar>{children}</Sidebar>
+        </SearchProvider>
       </body>
     </html>
   );

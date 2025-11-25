@@ -1,6 +1,11 @@
+"use client";
+
+import { useEffect, useState } from 'react';
 import { getAnnonces, getFiltersData } from "./actions";
 import ImageCarousel from "@/components/ImageCarousel";
 import Link from 'next/link';
+import { useSearch } from "@/context/SearchContext";
+import { useSearchParams } from 'next/navigation';
 
 type SortOption = {
   value: string;
@@ -14,27 +19,53 @@ const SORT_OPTIONS: SortOption[] = [
   { value: 'prix-desc', label: 'Prix (décroissant)' },
 ];
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ 
-    ville?: string; 
-    type?: string;
-    sort?: string;
-  }>;
-}) {
-  const { ville = "", type = "", sort = 'created_at-desc' } = await searchParams;
+export default function Home() {
+  const searchParams = useSearchParams();
+  const { setSearchParams } = useSearch();
+  
+  const ville = searchParams.get('ville') || '';
+  const type = searchParams.get('type') || '';
+  const sort = searchParams.get('sort') || 'created_at-desc';
+  
   const [sortBy, sortOrder] = sort.split('-').slice(-2) as [string, 'asc' | 'desc'];
   
-  const [annonces, filters] = await Promise.all([
-    getAnnonces({ 
-      ville, 
-      type, 
-      sortBy: sortBy as any, 
-      sortOrder 
-    }),
-    getFiltersData(),
-  ]);
+  // Sauvegarder les paramètres de recherche dans le contexte
+  useEffect(() => {
+    setSearchParams({
+      ville,
+      type,
+      sort
+    });
+  }, [ville, type, sort, setSearchParams]);
+  
+  const [annonces, setAnnonces] = useState<any[]>([]);
+  const [filters, setFilters] = useState<{villes: string[], types: string[]}>({ villes: [], types: [] });
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [annoncesData, filtersData] = await Promise.all([
+          getAnnonces({ 
+            ville, 
+            type, 
+            sortBy: sortBy as any, 
+            sortOrder 
+          }),
+          getFiltersData(),
+        ]);
+        setAnnonces(annoncesData);
+        setFilters(filtersData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [ville, type, sortBy, sortOrder]);
 
   return (
     <div>
@@ -129,8 +160,13 @@ export default async function Home({
         </div>
       </form>
 
-      <div className="grid grid-cols-1 gap-6 lg:gap-8">
-        {annonces.map((annonce: any) => {
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 lg:gap-8">
+          {annonces.map((annonce: any) => {
           const imageUrl = annonce.photos?.[0] ?? "";
           const prixFormate = formatPrix(annonce.prix);
           const type = annonce.type ?? "Annonce";
@@ -222,8 +258,9 @@ export default async function Home({
               </div>
             </div>
           );
-        })}
-      </div>
+          })}
+        </div>
+      )}
     </div>
   );
 }
