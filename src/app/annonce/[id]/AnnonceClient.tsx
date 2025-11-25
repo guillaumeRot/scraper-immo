@@ -10,16 +10,25 @@ import { getAnnonceById } from "@/app/actions";
 import PrixNegocie from "@/components/PrixNegocie";
 
 interface AnnonceClientProps {
-  annonceId: string;
+  annonceId: string | undefined;
 }
 
 export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
+  if (!annonceId) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-lg text-gray-600">ID d'annonce manquant</p>
+      </div>
+    );
+  }
   const [annonce, setAnnonce] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { searchParams } = useSearch();
   const router = useRouter();
 
   useEffect(() => {
+    if (!annonceId) return;
+    
     const fetchAnnonce = async () => {
       try {
         const data = await getAnnonceById(annonceId);
@@ -32,6 +41,11 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
     };
 
     fetchAnnonce();
+    
+    // Nettoyage
+    return () => {
+      // Annuler les requêtes en cours si nécessaire
+    };
   }, [annonceId]);
 
   if (loading) {
