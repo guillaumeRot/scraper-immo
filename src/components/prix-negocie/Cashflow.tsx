@@ -14,7 +14,7 @@ export function Cashflow({ loyerMensuel, impotFoncier, mensualite }: CashflowPro
   return (
     <div className="bg-white p-4 rounded-lg shadow">
       <h3 className="text-lg font-medium text-gray-900 mb-2">Cashflow mensuel</h3>
-      <div className="text-2xl font-bold">
+      <div className={`text-2xl font-bold ${cashflow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
         {formatNumber(cashflow)} €
       </div>
       <div className="text-sm text-gray-500 mt-1">
