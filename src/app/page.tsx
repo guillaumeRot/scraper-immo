@@ -139,9 +139,9 @@ export default async function Home({
           return (
             <div
               key={annonce.id}
-              className="group relative overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 lg:mx-auto w-full lg:flex h-72"
+              className="group relative overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 lg:mx-auto w-full lg:flex lg:h-72"
             >
-              <div className="lg:w-1/3 flex-shrink-0 h-72">
+              <div className="h-48 sm:h-56 lg:w-1/3 lg:flex-shrink-0 lg:h-auto">
                 <ImageCarousel images={annonce.photos || []} />
               </div>
 
