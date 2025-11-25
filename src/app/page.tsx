@@ -141,8 +141,10 @@ export default async function Home({
               key={annonce.id}
               className="group relative overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 lg:mx-auto w-full lg:flex lg:h-72"
             >
-              <div className="h-48 sm:h-56 lg:w-1/3 lg:flex-shrink-0 lg:h-auto">
-                <ImageCarousel images={annonce.photos || []} />
+              <div className="lg:w-1/3 lg:flex-shrink-0 lg:h-auto">
+                <div className="h-full">
+                  <ImageCarousel images={annonce.photos || []} />
+                </div>
               </div>
 
               <div className="p-4 sm:p-5 lg:w-2/3 flex flex-col">
