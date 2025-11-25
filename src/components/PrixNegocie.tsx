@@ -7,6 +7,7 @@ import { ApportInput } from './prix-negocie/ApportInput';
 import { FraisNotaire } from './prix-negocie/FraisNotaire';
 import { Mensualite } from './prix-negocie/Mensualite';
 import { ImpotFoncier } from './prix-negocie/ImpotFoncier';
+import { Cashflow } from './prix-negocie/Cashflow';
 
 interface PrixNegocieProps {
   prixInitial: string;
@@ -89,14 +90,23 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
         coutTotal={coutTotal}
       />
 
-      {/* Mensualité sur 20 ans */}
-      <Mensualite 
-        mensualite={mensualite}
-        taux={tauxInteret}
-        apport={apport}
-        prixNegocie={prixAAfficher}
-        fraisNotaire={fraisNotaire}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Mensualité sur 20 ans */}
+        <Mensualite 
+          mensualite={mensualite}
+          taux={tauxInteret}
+          apport={apport}
+          prixNegocie={prixAAfficher}
+          fraisNotaire={fraisNotaire}
+        />
+        
+        {/* Cashflow mensuel */}
+        <Cashflow 
+          loyerMensuel={loyerMensuel}
+          impotFoncier={parseInt(impotFoncier) || 0}
+          mensualite={mensualite}
+        />
+      </div>
     </div>
   );
 }
