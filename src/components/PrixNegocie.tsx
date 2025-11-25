@@ -73,7 +73,7 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
         <LoyerEstime 
           loyerMensuel={loyerMensuel}
           onLoyerChange={setLoyerMensuel}
-          prixNegocie={prixAAfficher}
+          coutTotal={coutTotal}
         />
         {/* Impôt foncier */}
         <ImpotFoncier 

@@ -3,10 +3,10 @@ import { useState, KeyboardEvent } from 'react';
 interface LoyerEstimeProps {
   loyerMensuel: string;
   onLoyerChange: (value: string) => void;
-  prixNegocie: string | null;
+  coutTotal?: number;
 }
 
-export function LoyerEstime({ loyerMensuel, onLoyerChange, prixNegocie }: LoyerEstimeProps) {
+export function LoyerEstime({ loyerMensuel, onLoyerChange, coutTotal }: LoyerEstimeProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
@@ -78,9 +78,9 @@ export function LoyerEstime({ loyerMensuel, onLoyerChange, prixNegocie }: LoyerE
           </div>
         )}
       </div>
-      {loyerMensuel && prixNegocie && (
+      {loyerMensuel && coutTotal && coutTotal > 0 && (
         <p className="text-xs text-gray-500 mt-1">
-          Rendement brut: {((parseInt(loyerMensuel) * 12 / parseInt(prixNegocie.replace(/\D/g, ''))) * 100).toFixed(2)}%
+          Rendement brut: {((parseInt(loyerMensuel) * 12 / coutTotal) * 100).toFixed(2)}%
         </p>
       )}
     </div>
