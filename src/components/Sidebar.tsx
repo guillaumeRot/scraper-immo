@@ -17,7 +17,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
       )}
       
       {/* Sidebar */}
-      <aside className={`fixed md:relative h-screen ${isSidebarOpen ? 'w-64' : 'w-0 md:w-20'} bg-white shadow-md transition-all duration-300 ease-in-out overflow-hidden z-30`}>
+      <aside className={`fixed md:relative h-screen ${isSidebarOpen ? 'w-64' : 'w-0'} bg-white shadow-md transition-all duration-300 ease-in-out overflow-hidden z-30`}>
         <div className="p-6 min-w-[16rem]">
           <div className="flex items-center justify-between">
             <Link href="/" className="inline-block">
@@ -68,7 +68,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
       {/* Main content */}
       <main className={`flex-1 p-6 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>
         {/* Bouton de menu pour mobile */}
-        <div className="md:hidden mb-4">
+        <div className={`mb-4 ${!isSidebarOpen ? 'md:block' : 'md:hidden'}`}>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="text-gray-600 hover:text-indigo-600 transition-colors p-2 rounded-md hover:bg-indigo-50 bg-white shadow-md"
