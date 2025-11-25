@@ -4,9 +4,10 @@ interface LoyerEstimeProps {
   loyerMensuel: string;
   onLoyerChange: (value: string) => void;
   coutTotal?: number;
+  impotFoncier?: number;
 }
 
-export function LoyerEstime({ loyerMensuel, onLoyerChange, coutTotal }: LoyerEstimeProps) {
+export function LoyerEstime({ loyerMensuel, onLoyerChange, coutTotal, impotFoncier = 0 }: LoyerEstimeProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
@@ -78,11 +79,18 @@ export function LoyerEstime({ loyerMensuel, onLoyerChange, coutTotal }: LoyerEst
           </div>
         )}
       </div>
-      {loyerMensuel && coutTotal && coutTotal > 0 && (
-        <p className="text-xs text-gray-500 mt-1">
-          Rendement brut: {((parseInt(loyerMensuel) * 12 / coutTotal) * 100).toFixed(2)}%
-        </p>
-      )}
+      <div className="space-y-1 mt-1">
+        {loyerMensuel && coutTotal && coutTotal > 0 && (
+          <p className="text-xs text-gray-500">
+            Rendement brut: {((parseInt(loyerMensuel) * 12 / coutTotal) * 100).toFixed(2)}%
+          </p>
+        )}
+        {loyerMensuel && coutTotal && coutTotal > 0 && impotFoncier && (
+          <p className="text-xs text-gray-500">
+            Rendement net: {(((parseInt(loyerMensuel) * 12 - impotFoncier) / coutTotal) * 100).toFixed(2)}%
+          </p>
+        )}
+      </div>
     </div>
   );
 }

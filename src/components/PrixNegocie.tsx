@@ -74,6 +74,7 @@ export default function PrixNegocie({ prixInitial, surface }: PrixNegocieProps) 
           loyerMensuel={loyerMensuel}
           onLoyerChange={setLoyerMensuel}
           coutTotal={coutTotal}
+          impotFoncier={parseInt(impotFoncier) || 0}
         />
         {/* Impôt foncier */}
         <ImpotFoncier 
