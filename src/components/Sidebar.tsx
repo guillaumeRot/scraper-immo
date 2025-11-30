@@ -61,12 +61,22 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 {isSidebarOpen && <span className="ml-3">Scanner</span>}
               </Link>
             </li>
+            <li>
+              <Link 
+                href="/dpe" 
+                onClick={() => setIsSidebarOpen(false)}
+                className="flex items-center w-full text-left px-4 py-2 rounded-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 font-medium transition-colors"
+              >
+                <span className="text-lg">📊</span>
+                {isSidebarOpen && <span className="ml-3">Données DPE</span>}
+              </Link>
+            </li>
           </ul>
         </nav>
       </aside>
 
       {/* Main content */}
-      <main className={`flex-1 p-6 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>
+      <main className={`flex-1 p-6 transition-all duration-300 ease-in-out`}>
         {/* Bouton de menu pour mobile */}
         <div className={`mb-4 ${!isSidebarOpen ? 'md:block' : 'md:hidden'}`}>
           <button
