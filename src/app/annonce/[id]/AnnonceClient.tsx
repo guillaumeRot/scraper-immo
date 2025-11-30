@@ -134,19 +134,19 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
             >
               Voir l'annonce originale →
             </a>
-            
-            {annonce.prix && (
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-lg font-semibold mb-3">Simulation</h3>
-                <PrixNegocie 
-                  prixInitial={annonce.prix} 
-                  surface={annonce.surface || undefined} 
-                />
-              </div>
-            )}
           </div>
         </div>
       </div>
+      
+        {annonce.prix && (
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3">Simulation</h3>
+            <PrixNegocie 
+              prixInitial={annonce.prix} 
+              surface={annonce.surface || undefined} 
+            />
+          </div>
+        )}
     </div>
   );
 }
