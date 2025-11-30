@@ -1,8 +1,16 @@
 import { DpeData } from './types';
 
 export default async function DpePage() {
+  const VILLES = ["Vitré", "Châteaugiron"];
+  const sixMoisAvant = new Date();
+  sixMoisAvant.setMonth(sixMoisAvant.getMonth() - 6);
+  const dateFormatee = sixMoisAvant.toISOString().split('T')[0];
+  
+  // Formatage correct des villes avec des guillemets individuels
+  const villesFormatees = VILLES.map(ville => `"${ville}"`).join(',');
+  
   const response = await fetch(
-    'https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?draft=false&size=20&truncate=50&sort=-date_derniere_modification_dpe&nom_commune_ban_in=%22Vitr%C3%A9%22,%22Ch%C3%A2teaugiron%22&finalizedAt=2025-11-26T23:10:29.169Z'
+    `https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?sort=-date_derniere_modification_dpe&nom_commune_ban_in=${encodeURIComponent(villesFormatees)}&date_derniere_modification_dpe_gte=${dateFormatee}`
   );
   const data = await response.json();
   const dpeData: DpeData[] = data.results;
