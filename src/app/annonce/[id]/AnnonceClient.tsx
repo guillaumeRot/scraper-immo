@@ -37,8 +37,54 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
   const [annonce, setAnnonce] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [dpeResults, setDpeResults] = useState<DpeData[]>([]);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof DpeData | null; direction: 'asc' | 'desc' }>({ 
+    key: null, 
+    direction: 'asc' 
+  });
   const { searchParams } = useSearch();
   const router = useRouter();
+
+  const requestSort = (key: keyof DpeData) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortedResults = () => {
+    if (!sortConfig.key) return dpeResults;
+
+    return [...dpeResults].sort((a, b) => {
+      const aValue = a[sortConfig.key as keyof DpeData];
+      const bValue = b[sortConfig.key as keyof DpeData];
+
+      if (aValue === bValue) return 0;
+      
+      if (aValue === null || aValue === undefined) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (bValue === null || bValue === undefined) return sortConfig.direction === 'asc' ? 1 : -1;
+      
+      if (aValue < bValue) {
+        return sortConfig.direction === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
+  const sortedResults = getSortedResults();
+
+  const getSortIndicator = (key: string) => {
+    if (sortConfig.key !== key) return null;
+    return (
+      <span className="ml-1">
+        {sortConfig.direction === 'asc' ? '↑' : '↓'}
+      </span>
+    );
+  };
+
 
   useEffect(() => {
     if (!annonceId) return;
@@ -175,7 +221,7 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
             }}
             className="space-y-4"
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               <div>
                 <label htmlFor="ville" className="block text-sm font-medium text-gray-700 mb-1">Ville</label>
                 <input
@@ -185,6 +231,7 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder="Ex: Paris"
+                  defaultValue={annonce?.ville || ''}
                 />
               </div>
               <div>
@@ -209,13 +256,15 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
                   placeholder="Ex: 12"
                 />
               </div>
+              <div className="flex items-end h-full">
+                <button
+                  type="submit"
+                  className="w-full h-10 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Chercher un DPE
+                </button>
+              </div>
             </div>
-            <button
-              type="submit"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Chercher un DPE
-            </button>
           </form>
 
           {dpeResults.length > 0 && (
@@ -223,18 +272,57 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Numéro DPE</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adresse</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étiquette DPE</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étiquette GES</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type de bâtiment</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chauffage</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Surface (m²)</th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-50"
+                      onClick={() => requestSort('numero_dpe')}
+                    >
+                      Numéro DPE {getSortIndicator('numero_dpe')}
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-50"
+                      onClick={() => requestSort('date_etablissement_dpe')}
+                    >
+                      Date {getSortIndicator('date_etablissement_dpe')}
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-50"
+                      onClick={() => requestSort('nom_commune_ban')}
+                    >
+                      Adresse {getSortIndicator('nom_commune_ban')}
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-50"
+                      onClick={() => requestSort('etiquette_dpe')}
+                    >
+                      Étiquette DPE {getSortIndicator('etiquette_dpe')}
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-50"
+                      onClick={() => requestSort('etiquette_ges')}
+                    >
+                      Étiquette GES {getSortIndicator('etiquette_ges')}
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-50"
+                      onClick={() => requestSort('type_batiment')}
+                    >
+                      Type de bâtiment {getSortIndicator('type_batiment')}
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Chauffage
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-50"
+                      onClick={() => requestSort('surface_habitable_logement')}
+                    >
+                      Surface (m²) {getSortIndicator('surface_habitable_logement')}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {dpeResults.map((dpe: DpeData, index: number) => (
+                  {sortedResults.map((dpe: DpeData, index: number) => (
                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{dpe.numero_dpe}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
