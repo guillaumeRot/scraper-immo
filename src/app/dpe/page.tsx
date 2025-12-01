@@ -6,27 +6,42 @@ import { useState, useEffect } from 'react';
 
 export default function DpePage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedVille, setSelectedVille] = useState<string>('');
   const [dpeData, setDpeData] = useState<DpeData[]>([]);
   const [filteredData, setFilteredData] = useState<DpeData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [villes, setVilles] = useState<string[]>([]);
+  const [pagination, setPagination] = useState<{
+    next: string | null;
+    previous: string | null;
+  }>({ next: null, previous: null });
+  const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
+  const fetchData = async (url?: string) => {
+    try {
+      setIsLoading(true);
+      let apiUrl = url;
+      
+      if (!apiUrl) {
         const VILLES = ["Vitré", "Châteaugiron"];
         const sixMoisAvant = new Date();
         sixMoisAvant.setMonth(sixMoisAvant.getMonth() - 6);
         const dateFormatee = sixMoisAvant.toISOString().split('T')[0];
-        
-        // Formatage correct des villes avec des guillemets individuels
         const villesFormatees = VILLES.map(ville => `"${ville}"`).join(',');
         
-        const response = await fetch(
-          `https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?sort=-date_derniere_modification_dpe&nom_commune_ban_in=${encodeURIComponent(villesFormatees)}&date_derniere_modification_dpe_gte=${dateFormatee}`
-        );
-        const data = await response.json();
-        setDpeData(data.results);
-        setFilteredData(data.results);
+        apiUrl = `https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?draft=false&size=20&truncate=50&sort=-date_derniere_modification_dpe&nom_commune_ban_in=${encodeURIComponent(villesFormatees)}&date_derniere_modification_dpe_gte=${dateFormatee}`;
+      }
+      
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      setPagination({
+        next: data.links?.next || null,
+        previous: data.links?.previous || null
+      });
+      
+      setDpeData(prevData => url ? [...prevData, ...data.results] : data.results);
+      setFilteredData(prevData => url ? [...prevData, ...data.results] : data.results);
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
       } finally {
@@ -34,20 +49,57 @@ export default function DpePage() {
       }
     };
 
+    // Chargement initial des données
+  useEffect(() => {
     fetchData();
   }, []);
 
+  // Fonction pour charger plus de résultats
+  const loadMoreResults = async () => {
+    if (pagination.next) {
+      await fetchData(pagination.next);
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  // Fonction pour revenir à la page précédente
+  const loadPreviousResults = async () => {
+    if (pagination.previous) {
+      await fetchData(pagination.previous);
+      setCurrentPage(prev => Math.max(1, prev - 1));
+    }
+  };
+
+  // Mise à jour des villes uniques disponibles
   useEffect(() => {
-    if (searchTerm === '') {
-      setFilteredData(dpeData);
-    } else {
-      const filtered = dpeData.filter(item => 
+    if (dpeData.length > 0) {
+      const villesUniques = Array.from(new Set(dpeData.map(item => item.nom_commune_ban))).filter(Boolean) as string[];
+      setVilles(villesUniques.sort());
+    }
+  }, [dpeData]);
+
+  // Filtrage des données
+  useEffect(() => {
+    // On ne filtre que les données chargées localement
+    let filtered = [...dpeData];
+
+    // Filtre par recherche texte
+    if (searchTerm) {
+      filtered = filtered.filter(item => 
         (item.nom_rue_ban?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.numero_voie_ban?.toString().includes(searchTerm) ||
         item.nom_commune_ban?.toLowerCase().includes(searchTerm.toLowerCase()))
       );
-      setFilteredData(filtered);
     }
+
+    // Filtre par ville sélectionnée
+    if (selectedVille) {
+      filtered = filtered.filter(item => 
+        item.nom_commune_ban === selectedVille
+      );
+    }
+
+    setFilteredData(filtered);
   }, [searchTerm, dpeData]);
 
   if (isLoading) {
@@ -60,9 +112,29 @@ export default function DpePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold">Données DPE</h1>
-        <div className="relative">
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div className="relative flex-1">
+            <select
+              value={selectedVille}
+              onChange={(e) => setSelectedVille(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+            >
+              <option value="">Toutes les villes</option>
+              {villes.map((ville) => (
+                <option key={ville} value={ville}>
+                  {ville}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+              </svg>
+            </div>
+          </div>
+          <div className="relative flex-1">
           <input
             type="text"
             placeholder="Rechercher une adresse..."
@@ -84,6 +156,7 @@ export default function DpePage() {
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
+          </div>
         </div>
       </div>
       
@@ -144,6 +217,27 @@ export default function DpePage() {
             )}
           </tbody>
         </table>
+      </div>
+      
+      {/* Boutons de pagination */}
+      <div className="mt-6 flex justify-between items-center">
+        <button
+          onClick={loadPreviousResults}
+          disabled={!pagination.previous}
+          className={`px-4 py-2 rounded-lg border ${pagination.previous ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}
+        >
+          Page précédente
+        </button>
+        
+        <span className="text-gray-600">Page {currentPage}</span>
+        
+        <button
+          onClick={loadMoreResults}
+          disabled={!pagination.next}
+          className={`px-4 py-2 rounded-lg border ${pagination.next ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}`}
+        >
+          Page suivante
+        </button>
       </div>
     </div>
   );
