@@ -4,10 +4,12 @@ import { DpeData } from './types';
 import { useState, useEffect } from 'react';
 
 export default function DpePage() {
+  const VILLES = ["Vitré", "Châteaugiron", "Fougères"];
   const [dpeData, setDpeData] = useState<DpeData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [selectedCities, setSelectedCities] = useState<string[]>(VILLES);
 
   const fetchData = async (isLoadMore = false) => {
     try {
@@ -21,10 +23,7 @@ export default function DpePage() {
       let apiUrl = isLoadMore ? nextUrl : null;
       
       if (!apiUrl) {
-        const VILLES = ["Vitré", "Châteaugiron", "Fougères"];
-        const sixMoisAvant = new Date();
-        sixMoisAvant.setMonth(sixMoisAvant.getMonth() - 6);
-        const villesFormatees = VILLES.map(ville => `"${ville}"`).join(',');
+        const villesFormatees = selectedCities.map(ville => `"${ville}"`).join(',');
         
         apiUrl = `https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?draft=false&size=20&truncate=50&sort=-date_derniere_modification_dpe&nom_commune_ban_in=${encodeURIComponent(villesFormatees)}&surface_habitable_immeuble_lte=250`;
       }
@@ -50,6 +49,22 @@ export default function DpePage() {
     fetchData();
   }, []);
 
+  // Gestion du changement de sélection des villes
+  const handleCityChange = (city: string, isChecked: boolean) => {
+    if (isChecked) {
+      setSelectedCities(prev => [...prev, city]);
+    } else {
+      setSelectedCities(prev => prev.filter(c => c !== city));
+    }
+  };
+
+  // Recharger les données quand les villes sélectionnées changent
+  useEffect(() => {
+    if (selectedCities.length > 0) {
+      fetchData();
+    }
+  }, [selectedCities]);
+
   // Fonction pour charger les résultats suivants
   const loadMoreResults = async () => {
     if (nextUrl && !isLoadingMore) {
@@ -66,9 +81,26 @@ export default function DpePage() {
   }
 
   return (
-    <div className="container">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-2xl md:text-3xl font-bold">Données DPE</h1>
+        
+        <div className="w-full md:w-auto">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Filtrer par ville :</label>
+          <div className="flex flex-wrap gap-2">
+            {VILLES.map((city) => (
+              <label key={city} className="inline-flex items-center bg-white px-3 py-1 rounded border border-gray-300 cursor-pointer hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 text-blue-600"
+                  checked={selectedCities.includes(city)}
+                  onChange={(e) => handleCityChange(city, e.target.checked)}
+                />
+                <span className="ml-2 text-sm text-gray-700">{city}</span>
+              </label>
+            ))}
+          </div>
+        </div>
       </div>
       
       <div className="overflow-x-auto bg-white rounded-lg shadow">
