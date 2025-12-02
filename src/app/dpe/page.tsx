@@ -4,6 +4,7 @@ import { DpeData } from './types';
 import { useState, useEffect } from 'react';
 
 export default function DpePage() {
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const VILLES = ["Vitré", "Châteaugiron", "Fougères"];
   const [dpeData, setDpeData] = useState<DpeData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,9 +50,22 @@ export default function DpePage() {
     fetchData();
   }, []);
 
-  // Gestion du changement de sélection de la ville
-  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCities(e.target.value ? [e.target.value] : []);
+  // Gestion du changement de sélection des villes
+  const handleCityChange = (city: string, isChecked: boolean) => {
+    if (isChecked) {
+      setSelectedCities(prev => [...prev, city]);
+    } else {
+      setSelectedCities(prev => prev.filter(c => c !== city));
+    }
+  };
+
+  // Gestion de la sélection/désélection de toutes les villes
+  const toggleAllCities = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedCities([...VILLES]);
+    } else {
+      setSelectedCities([]);
+    }
   };
 
   // Recharger les données quand les villes sélectionnées changent
@@ -77,27 +91,66 @@ export default function DpePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold">Données DPE</h1>
-        
-        <div className="w-full md:w-64">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Sélectionnez une ville :</label>
-          <select
-            value={selectedCities[0] || ''}
-            onChange={handleCityChange}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+    <div className="container">
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl md:text-3xl font-bold">Données DPE</h1>
+          <button
+            onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+            className="flex items-center text-sm text-blue-600 hover:text-blue-800"
           >
-            <option value="">Toutes les villes</option>
-            {VILLES.map((city) => (
-              <option key={city} value={city}>
-                {city}
-              </option>
-            ))}
-          </select>
+            {isFiltersOpen ? (
+              <>
+                <span>Masquer les filtres</span>
+                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                </svg>
+              </>
+            ) : (
+              <>
+                <span>Afficher les filtres</span>
+                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </>
+            )}
+          </button>
+        </div>
+        
+        <div className={`transition-all duration-300 overflow-hidden ${isFiltersOpen ? 'max-h-96' : 'max-h-0'}`}>
+          <div className="w-full max-w-md bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <h3 className="text-lg font-medium text-gray-900 mb-3">Filtres</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Villes :</label>
+                <div className="bg-white border border-gray-200 rounded-lg p-3 max-h-60 overflow-y-auto">
+                  <label className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                      checked={selectedCities.length === VILLES.length}
+                      onChange={toggleAllCities}
+                    />
+                    <span className="text-sm font-medium">Toutes les villes</span>
+                  </label>
+                  <div className="border-t border-gray-200 my-1"></div>
+                  {VILLES.map((city) => (
+                    <label key={city} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                        checked={selectedCities.includes(city)}
+                        onChange={(e) => handleCityChange(city, e.target.checked)}
+                      />
+                      <span className="text-sm text-gray-700">{city}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      
       <div className="overflow-x-auto bg-white rounded-lg shadow">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">

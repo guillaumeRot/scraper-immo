@@ -76,7 +76,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main content */}
-      <main className={`flex-1 p-6 transition-all duration-300 ease-in-out`}>
+      <main className={`flex-1 p-6 transition-all duration-300 ease-in-out overflow-hidden`}>
         {/* Bouton de menu pour mobile */}
         <div className={`mb-4 ${!isSidebarOpen ? 'md:block' : 'md:hidden'}`}>
           <button
