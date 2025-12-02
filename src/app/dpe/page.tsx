@@ -21,14 +21,12 @@ export default function DpePage() {
       let apiUrl = isLoadMore ? nextUrl : null;
       
       if (!apiUrl) {
-        const VILLES = ["Vitré", "Châteaugiron"];
+        const VILLES = ["Vitré", "Châteaugiron", "Fougères"];
         const sixMoisAvant = new Date();
         sixMoisAvant.setMonth(sixMoisAvant.getMonth() - 6);
-        const dateFormatee = sixMoisAvant.toISOString().split('T')[0];
         const villesFormatees = VILLES.map(ville => `"${ville}"`).join(',');
         
-        // apiUrl = `https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?draft=false&size=20&truncate=50&sort=-date_derniere_modification_dpe&nom_commune_ban_in=${encodeURIComponent(villesFormatees)}&date_derniere_modification_dpe_gte=${dateFormatee}`;
-        apiUrl = `https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?draft=false&size=20&truncate=50&sort=-date_derniere_modification_dpe&nom_commune_ban_in=%22Vitr%C3%A9%22,%22Ch%C3%A2teaugiron%22,%22Foug%C3%A8res%22&surface_habitable_immeuble_lte=250&finalizedAt=2025-11-26T23:10:29.169Z`;
+        apiUrl = `https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?draft=false&size=20&truncate=50&sort=-date_derniere_modification_dpe&nom_commune_ban_in=${encodeURIComponent(villesFormatees)}&surface_habitable_immeuble_lte=250`;
       }
       
       const response = await fetch(apiUrl);
@@ -80,10 +78,19 @@ export default function DpePage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adresse</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ville</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type de bâtiment</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Surface (m²)</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Surface logement (m²)</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Surface immeuble (m²)</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classe DPE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">GES</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date DPE</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date visite</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nb apparts</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nb niveaux immeuble</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nb niveaux logement</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Typologie</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étage</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complément</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -108,7 +115,10 @@ export default function DpePage() {
                     <div className="text-sm text-gray-900">{item.type_batiment}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{item.surface_habitable_logement} m²</div>
+                    <div className="text-sm text-gray-900">{item.surface_habitable_logement || '-'} m²</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{item.surface_habitable_immeuble ? `${item.surface_habitable_immeuble} m²` : '-'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -123,7 +133,31 @@ export default function DpePage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(item.date_etablissement_dpe).toLocaleDateString('fr-FR')}
+                    {item.date_etablissement_dpe ? new Date(item.date_etablissement_dpe).toLocaleDateString('fr-FR') : '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {item.date_visite_diagnostiqueur ? new Date(item.date_visite_diagnostiqueur).toLocaleDateString('fr-FR') : '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {item.nombre_appartement || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {item.nombre_niveau_immeuble || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {item.nombre_niveau_logement || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {item.typologie_logement || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {item.numero_etage_appartement || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {item.position_logement_dans_immeuble || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {item.complement_adresse_logement || '-'}
                   </td>
                 </tr>
               ))
