@@ -49,13 +49,9 @@ export default function DpePage() {
     fetchData();
   }, []);
 
-  // Gestion du changement de sélection des villes
-  const handleCityChange = (city: string, isChecked: boolean) => {
-    if (isChecked) {
-      setSelectedCities(prev => [...prev, city]);
-    } else {
-      setSelectedCities(prev => prev.filter(c => c !== city));
-    }
+  // Gestion du changement de sélection de la ville
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCities(e.target.value ? [e.target.value] : []);
   };
 
   // Recharger les données quand les villes sélectionnées changent
@@ -85,21 +81,20 @@ export default function DpePage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-2xl md:text-3xl font-bold">Données DPE</h1>
         
-        <div className="w-full md:w-auto">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Filtrer par ville :</label>
-          <div className="flex flex-wrap gap-2">
+        <div className="w-full md:w-64">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Sélectionnez une ville :</label>
+          <select
+            value={selectedCities[0] || ''}
+            onChange={handleCityChange}
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+          >
+            <option value="">Toutes les villes</option>
             {VILLES.map((city) => (
-              <label key={city} className="inline-flex items-center bg-white px-3 py-1 rounded border border-gray-300 cursor-pointer hover:bg-gray-50">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-4 w-4 text-blue-600"
-                  checked={selectedCities.includes(city)}
-                  onChange={(e) => handleCityChange(city, e.target.checked)}
-                />
-                <span className="ml-2 text-sm text-gray-700">{city}</span>
-              </label>
+              <option key={city} value={city}>
+                {city}
+              </option>
             ))}
-          </div>
+          </select>
         </div>
       </div>
       
