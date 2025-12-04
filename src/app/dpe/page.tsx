@@ -11,6 +11,10 @@ export default function DpePage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [selectedCities, setSelectedCities] = useState<string[]>(VILLES);
+  const [streetNumber, setStreetNumber] = useState<string>('');
+  const [streetName, setStreetName] = useState<string>('');
+  const [tempStreetNumber, setTempStreetNumber] = useState<string>('');
+  const [tempStreetName, setTempStreetName] = useState<string>('');
 
   const fetchData = async (isLoadMore = false) => {
     try {
@@ -26,7 +30,23 @@ export default function DpePage() {
       if (!apiUrl) {
         const villesFormatees = selectedCities.map(ville => `"${ville}"`).join(',');
         
-        apiUrl = `https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?draft=false&size=20&truncate=50&sort=-date_derniere_modification_dpe&nom_commune_ban_in=${encodeURIComponent(villesFormatees)}&surface_habitable_immeuble_lte=250`;
+        let urlParams = new URLSearchParams({
+          draft: 'false',
+          size: '20',
+          truncate: '50',
+          sort: '-date_derniere_modification_dpe',
+          'nom_commune_ban_in': villesFormatees
+        });
+
+        if (streetNumber) {
+          urlParams.append('numero_voie_ban_eq', streetNumber);
+        }
+        
+        if (streetName) {
+          urlParams.append('nom_rue_ban_search', streetName);
+        }
+        
+        apiUrl = `https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?${urlParams.toString()}`;
       }
       
       const response = await fetch(apiUrl);
@@ -68,12 +88,24 @@ export default function DpePage() {
     }
   };
 
-  // Recharger les données quand les villes sélectionnées changent
+  // Recharger les données quand les filtres changent
   useEffect(() => {
     if (selectedCities.length > 0) {
       fetchData();
     }
-  }, [selectedCities]);
+  }, [selectedCities, streetNumber, streetName]);
+
+  // Initialiser les champs temporaires
+  useEffect(() => {
+    setTempStreetNumber(streetNumber);
+    setTempStreetName(streetName);
+  }, []);
+
+  // Appliquer les filtres
+  const applyFilters = () => {
+    setStreetNumber(tempStreetNumber);
+    setStreetName(tempStreetName);
+  };
 
   // Fonction pour charger les résultats suivants
   const loadMoreResults = async () => {
@@ -118,10 +150,45 @@ export default function DpePage() {
         </div>
         
         <div className={`transition-all duration-300 overflow-hidden ${isFiltersOpen ? 'max-h-96' : 'max-h-0'}`}>
-          <div className="w-full max-w-md bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <div className="w-full bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
             <h3 className="text-lg font-medium text-gray-900 mb-3">Filtres</h3>
-            <div className="space-y-4">
-              <div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="space-y-4 lg:col-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="streetNumber" className="block text-sm font-medium text-gray-700 mb-1">Numéro de voie</label>
+                    <input
+                      type="text"
+                      id="streetNumber"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      value={tempStreetNumber}
+                      onChange={(e) => setTempStreetNumber(e.target.value)}
+                      placeholder="Ex: 18"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="streetName" className="block text-sm font-medium text-gray-700 mb-1">Nom de la rue</label>
+                    <input
+                      type="text"
+                      id="streetName"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      value={tempStreetName}
+                      onChange={(e) => setTempStreetName(e.target.value)}
+                      placeholder="Ex: Rue Savary"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <button
+                    onClick={applyFilters}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Appliquer les filtres
+                  </button>
+                </div>
+              </div>
+              
+              <div className="lg:border-l lg:pl-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Villes :</label>
                 <div className="bg-white border border-gray-200 rounded-lg p-3 max-h-60 overflow-y-auto">
                   <label className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
@@ -133,7 +200,7 @@ export default function DpePage() {
                     />
                     <span className="text-sm font-medium">Toutes les villes</span>
                   </label>
-                  <div className="border-t border-gray-200 my-1"></div>
+                  <div className="border-t border-gray-200 my-2"></div>
                   {VILLES.map((city) => (
                     <label key={city} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
                       <input
@@ -171,6 +238,7 @@ export default function DpePage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étage</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complément</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Numéro DPE</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -238,6 +306,9 @@ export default function DpePage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {item.complement_adresse_logement || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                    {item.numero_dpe || '-'}
                   </td>
                 </tr>
               ))
