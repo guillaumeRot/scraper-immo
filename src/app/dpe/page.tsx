@@ -11,10 +11,12 @@ export default function DpePage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [selectedCities, setSelectedCities] = useState<string[]>(VILLES);
+  const [selectedBuildingTypes, setSelectedBuildingTypes] = useState<string[]>(['Appartement', 'Immeuble', 'Maison']);
   const [streetNumber, setStreetNumber] = useState<string>('');
   const [streetName, setStreetName] = useState<string>('');
   const [tempStreetNumber, setTempStreetNumber] = useState<string>('');
   const [tempStreetName, setTempStreetName] = useState<string>('');
+  const BUILDING_TYPES = ['Appartement', 'Immeuble', 'Maison'];
 
   const fetchData = async (isLoadMore = false) => {
     try {
@@ -44,6 +46,12 @@ export default function DpePage() {
         
         if (streetName) {
           urlParams.append('nom_rue_ban_search', streetName);
+        }
+
+        if (selectedBuildingTypes.length > 0) {
+          // Formater les types de bâtiment pour l'URL
+          const typesFormates = selectedBuildingTypes.map(type => `"${type.toLowerCase()}"`).join(',');
+          urlParams.append('type_batiment_in', typesFormates);
         }
         
         apiUrl = `https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?${urlParams.toString()}`;
@@ -88,12 +96,30 @@ export default function DpePage() {
     }
   };
 
+  // Gestion du changement de type de bâtiment
+  const handleBuildingTypeChange = (type: string, isChecked: boolean) => {
+    if (isChecked) {
+      setSelectedBuildingTypes(prev => [...prev, type]);
+    } else {
+      setSelectedBuildingTypes(prev => prev.filter(t => t !== type));
+    }
+  };
+
+  // Gestion de la sélection/désélection de tous les types de bâtiment
+  const toggleAllBuildingTypes = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedBuildingTypes([...BUILDING_TYPES]);
+    } else {
+      setSelectedBuildingTypes([]);
+    }
+  };
+
   // Recharger les données quand les filtres changent
   useEffect(() => {
-    if (selectedCities.length > 0) {
+    if (selectedCities.length > 0 && selectedBuildingTypes.length > 0) {
       fetchData();
     }
-  }, [selectedCities, streetNumber, streetName]);
+  }, [selectedCities, selectedBuildingTypes, streetNumber, streetName]);
 
   // Initialiser les champs temporaires
   useEffect(() => {
@@ -149,10 +175,10 @@ export default function DpePage() {
           </button>
         </div>
         
-        <div className={`transition-all duration-300 overflow-hidden ${isFiltersOpen ? 'max-h-96' : 'max-h-0'}`}>
+        <div className={`transition-all duration-300 overflow-hidden ${isFiltersOpen ? 'h-full' : 'max-h-0'}`}>
           <div className="w-full bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
             <h3 className="text-lg font-medium text-gray-900 mb-3">Filtres</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               <div className="space-y-4 lg:col-span-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -187,8 +213,35 @@ export default function DpePage() {
                   </button>
                 </div>
               </div>
-              
-              <div className="lg:border-l lg:pl-6">
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Type de bâtiment :</label>
+                <div className="bg-white border border-gray-200 rounded-lg p-3 max-h-60 overflow-y-auto">
+                  <label className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                      checked={selectedBuildingTypes.length === BUILDING_TYPES.length}
+                      onChange={toggleAllBuildingTypes}
+                    />
+                    <span className="text-sm font-medium">Tous les types</span>
+                  </label>
+                  <div className="border-t border-gray-200 my-2"></div>
+                  {BUILDING_TYPES.map((type) => (
+                    <label key={type} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                        checked={selectedBuildingTypes.includes(type)}
+                        onChange={(e) => handleBuildingTypeChange(type, e.target.checked)}
+                      />
+                      <span className="text-sm text-gray-700">{type}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+                
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Villes :</label>
                 <div className="bg-white border border-gray-200 rounded-lg p-3 max-h-60 overflow-y-auto">
                   <label className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
