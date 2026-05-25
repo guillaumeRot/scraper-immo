@@ -4,7 +4,6 @@ import { DpeData } from './types';
 import { useState, useEffect } from 'react';
 
 export default function DpePage() {
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const VILLES = ["Vitré", "Châteaugiron", "Fougères"];
   const [dpeData, setDpeData] = useState<DpeData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -140,135 +139,79 @@ export default function DpePage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl md:text-3xl font-bold">Données DPE</h1>
-          <button
-            onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-            className="flex items-center text-sm text-blue-600 hover:text-blue-800"
-          >
-            {isFiltersOpen ? (
-              <>
-                <span>Masquer les filtres</span>
-                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                </svg>
-              </>
-            ) : (
-              <>
-                <span>Afficher les filtres</span>
-                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </>
-            )}
-          </button>
-        </div>
-        
-        <div className={`transition-all duration-300 overflow-hidden ${isFiltersOpen ? 'h-full' : 'max-h-0'}`}>
-          <div className="w-full bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-            <h3 className="text-lg font-medium text-gray-900 mb-3">Filtres</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              <div className="space-y-4 lg:col-span-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="streetNumber" className="block text-sm font-medium text-gray-700 mb-1">Numéro de voie</label>
-                    <input
-                      type="text"
-                      id="streetNumber"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      value={tempStreetNumber}
-                      onChange={(e) => setTempStreetNumber(e.target.value)}
-                      placeholder="Ex: 18"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="streetName" className="block text-sm font-medium text-gray-700 mb-1">Nom de la rue</label>
-                    <input
-                      type="text"
-                      id="streetName"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      value={tempStreetName}
-                      onChange={(e) => setTempStreetName(e.target.value)}
-                      placeholder="Ex: Rue Savary"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <button
-                    onClick={applyFilters}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Appliquer les filtres
-                  </button>
-                </div>
-              </div>
+    <div>
+      {/* En-tête */}
+      <div className="mb-6 pl-4 border-l-4 border-indigo-500">
+        <h1 className="text-2xl font-bold text-gray-900">Données DPE</h1>
+        <p className="text-sm text-gray-400 mt-0.5">
+          {isLoading ? 'Chargement…' : `${dpeData.length} résultat${dpeData.length > 1 ? 's' : ''}`}
+        </p>
+      </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Type de bâtiment :</label>
-                <div className="bg-white border border-gray-200 rounded-lg p-3 max-h-60 overflow-y-auto">
-                  <label className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 text-blue-600 rounded border-gray-300"
-                      checked={selectedBuildingTypes.length === BUILDING_TYPES.length}
-                      onChange={toggleAllBuildingTypes}
-                    />
-                    <span className="text-sm font-medium">Tous les types</span>
-                  </label>
-                  <div className="border-t border-gray-200 my-2"></div>
-                  {BUILDING_TYPES.map((type) => (
-                    <label key={type} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 text-blue-600 rounded border-gray-300"
-                        checked={selectedBuildingTypes.includes(type)}
-                        onChange={(e) => handleBuildingTypeChange(type, e.target.checked)}
-                      />
-                      <span className="text-sm text-gray-700">{type}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-                
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Villes :</label>
-                <div className="bg-white border border-gray-200 rounded-lg p-3 max-h-60 overflow-y-auto">
-                  <label className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 text-blue-600 rounded border-gray-300"
-                      checked={selectedCities.length === VILLES.length}
-                      onChange={toggleAllCities}
-                    />
-                    <span className="text-sm font-medium">Toutes les villes</span>
-                  </label>
-                  <div className="border-t border-gray-200 my-2"></div>
-                  {VILLES.map((city) => (
-                    <label key={city} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 text-blue-600 rounded border-gray-300"
-                        checked={selectedCities.includes(city)}
-                        onChange={(e) => handleCityChange(city, e.target.checked)}
-                      />
-                      <span className="text-sm text-gray-700">{city}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Filtres chips */}
+      <div className="mb-8 space-y-3">
+        {/* Villes */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Ville</span>
+          <Chip
+            label="Toutes"
+            active={selectedCities.length === VILLES.length}
+            onClick={() => setSelectedCities([...VILLES])}
+          />
+          {VILLES.map((city) => (
+            <Chip
+              key={city}
+              label={city}
+              active={selectedCities.includes(city)}
+              onClick={() => handleCityChange(city, !selectedCities.includes(city))}
+            />
+          ))}
+        </div>
+
+        {/* Types de bâtiment */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Type</span>
+          <Chip
+            label="Tous"
+            active={selectedBuildingTypes.length === BUILDING_TYPES.length}
+            onClick={() => setSelectedBuildingTypes([...BUILDING_TYPES])}
+          />
+          {BUILDING_TYPES.map((type) => (
+            <Chip
+              key={type}
+              label={type}
+              active={selectedBuildingTypes.includes(type)}
+              onClick={() => handleBuildingTypeChange(type, !selectedBuildingTypes.includes(type))}
+            />
+          ))}
+        </div>
+
+        {/* Adresse */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Adresse</span>
+          <input
+            type="text"
+            value={tempStreetNumber}
+            onChange={(e) => setTempStreetNumber(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
+            placeholder="N° de voie"
+            className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-700 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 w-28"
+          />
+          <input
+            type="text"
+            value={tempStreetName}
+            onChange={(e) => setTempStreetName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
+            placeholder="Nom de la rue"
+            className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-700 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 w-44"
+          />
+          <button
+            onClick={applyFilters}
+            className="rounded-full bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
+          >
+            Rechercher
+          </button>
         </div>
       </div>
       <div className="overflow-x-auto bg-white rounded-lg shadow">
@@ -295,9 +238,15 @@ export default function DpePage() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {dpeData.length === 0 ? (
+            {isLoading ? (
               <tr>
-                <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={17} className="px-6 py-12 text-center">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+                </td>
+              </tr>
+            ) : dpeData.length === 0 ? (
+              <tr>
+                <td colSpan={17} className="px-6 py-4 text-center text-gray-500">
                   Aucun résultat trouvé
                 </td>
               </tr>
@@ -396,6 +345,22 @@ export default function DpePage() {
         </div>
       )}
     </div>
+  );
+}
+
+function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150 ${
+        active
+          ? 'bg-indigo-600 text-white shadow-sm'
+          : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-600'
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 
