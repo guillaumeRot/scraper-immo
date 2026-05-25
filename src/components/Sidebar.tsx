@@ -1,93 +1,77 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const NAV_ITEMS = [
+  {
+    href: "/",
+    label: "Résultats",
+    icon: (
+      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+    ),
+  },
+  {
+    href: "/scanner",
+    label: "Scanner",
+    icon: (
+      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/dpe",
+    label: "Données DPE",
+    icon: (
+      <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+  },
+];
 
 export default function Sidebar({ children }: { children: React.ReactNode }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
-    <div className="flex min-h-screen relative">
-      {/* Overlay pour fermer la sidebar au clic */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-      
-      {/* Sidebar */}
-      <aside className={`fixed md:relative h-screen ${isSidebarOpen ? 'w-64' : 'w-0'} bg-white shadow-md transition-all duration-300 ease-in-out overflow-hidden z-30`}>
-        <div className="p-6 min-w-[16rem]">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="inline-block">
-              <h1 className={`${isSidebarOpen ? "text-xl" : "text-lg"} font-bold text-indigo-600 hover:text-indigo-700 transition-colors`}>
-                {isSidebarOpen ? "🏠 Immo App" : "🏠"}
-              </h1>
-            </Link>
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="text-gray-600 hover:text-indigo-600 transition-colors p-1 rounded-md hover:bg-indigo-50"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isSidebarOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                )}
-              </svg>
-            </button>
-          </div>
+    <div className="flex min-h-screen">
+      <aside className="group/sidebar flex-shrink-0 w-14 hover:w-52 transition-[width] duration-200 ease-in-out bg-white border-r border-gray-100 flex flex-col overflow-hidden z-10">
+        {/* Logo */}
+        <div className="h-16 flex items-center px-4 border-b border-gray-100">
+          <span className="text-xl leading-none flex-shrink-0">🏠</span>
+          <span className="ml-3 text-indigo-600 font-semibold text-sm whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 delay-75">
+            Immo App
+          </span>
         </div>
-        <nav className="px-4 pb-6">
-          <ul className="space-y-2">
-            <li>
-              <Link 
-                href="/" 
-                onClick={() => setIsSidebarOpen(false)}
-                className="flex items-center w-full text-left px-4 py-2 rounded-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 font-medium transition-colors"
+
+        {/* Nav */}
+        <nav className="flex-1 px-2 py-4 space-y-1">
+          {NAV_ITEMS.map((item) => {
+            const active = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-150 ${
+                  active
+                    ? "bg-indigo-50 text-indigo-600"
+                    : "text-gray-400 hover:bg-gray-50 hover:text-gray-700"
+                }`}
               >
-                <span className="text-lg">📊</span>
-                {isSidebarOpen && <span className="ml-3">Résultats</span>}
+                {item.icon}
+                <span className="whitespace-nowrap text-sm font-medium opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 delay-75">
+                  {item.label}
+                </span>
               </Link>
-            </li>
-            <li>
-              <Link 
-                href="/scanner" 
-                onClick={() => setIsSidebarOpen(false)}
-                className="flex items-center w-full text-left px-4 py-2 rounded-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 font-medium transition-colors"
-              >
-                <span className="text-lg">🔍</span>
-                {isSidebarOpen && <span className="ml-3">Scanner</span>}
-              </Link>
-            </li>
-            <li>
-              <Link 
-                href="/dpe" 
-                onClick={() => setIsSidebarOpen(false)}
-                className="flex items-center w-full text-left px-4 py-2 rounded-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 font-medium transition-colors"
-              >
-                <span className="text-lg">📊</span>
-                {isSidebarOpen && <span className="ml-3">Données DPE</span>}
-              </Link>
-            </li>
-          </ul>
+            );
+          })}
         </nav>
       </aside>
 
-      {/* Main content */}
-      <main className={`flex-1 p-6 transition-all duration-300 ease-in-out overflow-hidden`}>
-        {/* Bouton de menu pour mobile */}
-        <div className={`mb-4 ${!isSidebarOpen ? 'md:block' : 'md:hidden'}`}>
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="text-gray-600 hover:text-indigo-600 transition-colors p-2 rounded-md hover:bg-indigo-50 bg-white shadow-md"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
+      <main className="flex-1 p-6 overflow-auto min-w-0">
         {children}
       </main>
     </div>

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getAnnonces, getFiltersData } from "../app/actions";
 import ImageCarousel from "@/components/ImageCarousel";
 import Link from 'next/link';
 import { useSearch } from "@/context/SearchContext";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 type SortOption = { value: string; label: string };
 
@@ -18,6 +18,7 @@ const SORT_OPTIONS: SortOption[] = [
 
 export default function Home() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { setSearchParams } = useSearch();
 
   const ville = searchParams.get('ville') || '';
@@ -28,6 +29,13 @@ export default function Home() {
   useEffect(() => {
     setSearchParams({ ville, type, sort });
   }, [ville, type, sort, setSearchParams]);
+
+  const setFilter = useCallback((key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) params.set(key, value);
+    else params.delete(key);
+    router.push(`/?${params.toString()}`);
+  }, [searchParams, router]);
 
   const [annonces, setAnnonces] = useState<any[]>([]);
   const [filters, setFilters] = useState<{ villes: string[]; types: string[] }>({ villes: [], types: [] });
@@ -55,48 +63,45 @@ export default function Home() {
   return (
     <div className="max-w-5xl mx-auto">
       {/* En-tête */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900">Annonces</h2>
+      <div className="mb-6 pl-4 border-l-4 border-indigo-500">
+        <h2 className="text-2xl font-bold text-gray-900">Annonces immobilières</h2>
         <p className="text-sm text-gray-400 mt-0.5">
           {loading ? 'Chargement…' : `${annonces.length} résultat${annonces.length > 1 ? 's' : ''}`}
         </p>
       </div>
 
-      {/* Filtres */}
-      <form action="/" method="GET" className="mb-8 flex flex-wrap gap-2 items-center">
-        <select
-          name="ville"
-          defaultValue={ville}
-          className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-700 focus:border-gray-400 focus:outline-none focus:ring-0 cursor-pointer"
-        >
-          <option value="">Toutes les villes</option>
-          {filters.villes.map((v) => <option key={v} value={v}>{v}</option>)}
-        </select>
+      {/* Filtres chips */}
+      <div className="mb-8 space-y-3">
+        {/* Villes */}
+        {filters.villes.length > 0 && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Ville</span>
+            <Chip label="Toutes" active={!ville} onClick={() => setFilter('ville', '')} />
+            {filters.villes.map((v) => (
+              <Chip key={v} label={v} active={ville === v} onClick={() => setFilter('ville', v)} />
+            ))}
+          </div>
+        )}
 
-        <select
-          name="type"
-          defaultValue={type}
-          className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-700 focus:border-gray-400 focus:outline-none focus:ring-0 cursor-pointer"
-        >
-          <option value="">Tous les types</option>
-          {filters.types.map((t) => <option key={t} value={t}>{t}</option>)}
-        </select>
+        {/* Types */}
+        {filters.types.length > 0 && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Type</span>
+            <Chip label="Tous" active={!type} onClick={() => setFilter('type', '')} />
+            {filters.types.map((t) => (
+              <Chip key={t} label={t} active={type === t} onClick={() => setFilter('type', t)} />
+            ))}
+          </div>
+        )}
 
-        <select
-          name="sort"
-          defaultValue={sort}
-          className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-700 focus:border-gray-400 focus:outline-none focus:ring-0 cursor-pointer"
-        >
-          {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-
-        <button
-          type="submit"
-          className="rounded-full bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
-        >
-          Appliquer
-        </button>
-      </form>
+        {/* Tri */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Tri</span>
+          {SORT_OPTIONS.map((o) => (
+            <Chip key={o.value} label={o.label} active={sort === o.value} onClick={() => setFilter('sort', o.value)} />
+          ))}
+        </div>
+      </div>
 
       {/* Liste */}
       {loading ? (
@@ -207,6 +212,22 @@ function AnnonceCard({ annonce }: { annonce: any }) {
         </div>
       </div>
     </Link>
+  );
+}
+
+function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150 ${
+        active
+          ? 'bg-indigo-600 text-white shadow-sm'
+          : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-600'
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 
