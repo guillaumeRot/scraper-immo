@@ -39,15 +39,15 @@ export default function ImageCarousel({ images }: { images: string[] }) {
       
       {images.length > 1 && (
         <>
-          <button 
-            onClick={scrollPrev}
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); scrollPrev(); }}
             className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 text-white rounded-full flex items-center justify-center hover:bg-black/50 transition-colors"
             aria-label="Image précédente"
           >
             &larr;
           </button>
-          <button 
-            onClick={scrollNext}
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); scrollNext(); }}
             className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 text-white rounded-full flex items-center justify-center hover:bg-black/50 transition-colors"
             aria-label="Image suivante"
           >
@@ -57,7 +57,7 @@ export default function ImageCarousel({ images }: { images: string[] }) {
             {images.map((_, index) => (
               <button
                 key={index}
-                onClick={() => emblaApi?.scrollTo(index)}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); emblaApi?.scrollTo(index); }}
                 className={`w-2 h-2 rounded-full transition-colors ${
                   emblaApi?.selectedScrollSnap() === index ? 'bg-white' : 'bg-white/50'
                 }`}

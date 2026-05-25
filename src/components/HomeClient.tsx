@@ -7,52 +7,38 @@ import Link from 'next/link';
 import { useSearch } from "@/context/SearchContext";
 import { useSearchParams } from 'next/navigation';
 
-type SortOption = {
-  value: string;
-  label: string;
-};
+type SortOption = { value: string; label: string };
 
 const SORT_OPTIONS: SortOption[] = [
-  { value: 'created_at-desc', label: 'Date de création (récents d\'abord)' },
-  { value: 'created_at-asc', label: 'Date de création (plus anciens d\'abord)' },
-  { value: 'prix-asc', label: 'Prix (croissant)' },
-  { value: 'prix-desc', label: 'Prix (décroissant)' },
+  { value: 'created_at-desc', label: 'Plus récentes' },
+  { value: 'created_at-asc', label: 'Plus anciennes' },
+  { value: 'prix-asc', label: 'Prix croissant' },
+  { value: 'prix-desc', label: 'Prix décroissant' },
 ];
 
 export default function Home() {
   const searchParams = useSearchParams();
   const { setSearchParams } = useSearch();
-  
+
   const ville = searchParams.get('ville') || '';
   const type = searchParams.get('type') || '';
   const sort = searchParams.get('sort') || 'created_at-desc';
-  
   const [sortBy, sortOrder] = sort.split('-').slice(-2) as [string, 'asc' | 'desc'];
-  
-  // Sauvegarder les paramètres de recherche dans le contexte
+
   useEffect(() => {
-    setSearchParams({
-      ville,
-      type,
-      sort
-    });
+    setSearchParams({ ville, type, sort });
   }, [ville, type, sort, setSearchParams]);
-  
+
   const [annonces, setAnnonces] = useState<any[]>([]);
-  const [filters, setFilters] = useState<{villes: string[], types: string[]}>({ villes: [], types: [] });
+  const [filters, setFilters] = useState<{ villes: string[]; types: string[] }>({ villes: [], types: [] });
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         const [annoncesData, filtersData] = await Promise.all([
-          getAnnonces({ 
-            ville, 
-            type, 
-            sortBy: sortBy as any, 
-            sortOrder 
-          }),
+          getAnnonces({ ville, type, sortBy: sortBy as any, sortOrder }),
           getFiltersData(),
         ]);
         setAnnonces(annoncesData);
@@ -63,229 +49,188 @@ export default function Home() {
         setLoading(false);
       }
     };
-    
     fetchData();
   }, [ville, type, sortBy, sortOrder]);
 
   return (
-    <div>
+    <div className="max-w-5xl mx-auto">
+      {/* En-tête */}
       <div className="mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
-          Dernières annonces
-        </h2>
-        <p className="text-gray-600 mt-1">
-          Explorez les opportunités immobilières récentes.
+        <h2 className="text-2xl font-semibold text-gray-900">Annonces</h2>
+        <p className="text-sm text-gray-400 mt-0.5">
+          {loading ? 'Chargement…' : `${annonces.length} résultat${annonces.length > 1 ? 's' : ''}`}
         </p>
       </div>
 
-      <form
-        action="/"
-        method="GET"
-        className="mb-8 space-y-4"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <div>
-            <label
-              htmlFor="ville"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Ville
-            </label>
-            <select
-              id="ville"
-              name="ville"
-              defaultValue={ville}
-              className="mt-1 block w-full rounded-md border-gray-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              <option value="">Toutes les villes</option>
-              {filters.villes.map((v: string) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* Filtres */}
+      <form action="/" method="GET" className="mb-8 flex flex-wrap gap-2 items-center">
+        <select
+          name="ville"
+          defaultValue={ville}
+          className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-700 focus:border-gray-400 focus:outline-none focus:ring-0 cursor-pointer"
+        >
+          <option value="">Toutes les villes</option>
+          {filters.villes.map((v) => <option key={v} value={v}>{v}</option>)}
+        </select>
 
-          <div>
-            <label
-              htmlFor="type"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Type de bien
-            </label>
-            <select
-              id="type"
-              name="type"
-              defaultValue={type}
-              className="mt-1 block w-full rounded-md border-gray-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              <option value="">Tous les types</option>
-              {filters.types.map((t: string) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
+        <select
+          name="type"
+          defaultValue={type}
+          className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-700 focus:border-gray-400 focus:outline-none focus:ring-0 cursor-pointer"
+        >
+          <option value="">Tous les types</option>
+          {filters.types.map((t) => <option key={t} value={t}>{t}</option>)}
+        </select>
 
-          <div>
-            <label
-              htmlFor="sort"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Trier par
-            </label>
-            <select
-              id="sort"
-              name="sort"
-              defaultValue={sort}
-              className="mt-1 block w-full rounded-md border-gray-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <select
+          name="sort"
+          defaultValue={sort}
+          className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-700 focus:border-gray-400 focus:outline-none focus:ring-0 cursor-pointer"
+        >
+          {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
 
-          <div className="flex items-end">
-            <button
-              type="submit"
-              className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 w-full justify-center"
-            >
-              Appliquer les filtres
-            </button>
-          </div>
-        </div>
+        <button
+          type="submit"
+          className="rounded-full bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
+        >
+          Appliquer
+        </button>
       </form>
 
+      {/* Liste */}
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 lg:gap-8">
-          {annonces.map((annonce: any) => {
-          const imageUrl = annonce.photos?.[0] ?? "";
-          const prixFormate = formatPrix(annonce.prix);
-          const type = annonce.type ?? "Annonce";
-          const ville = annonce.ville ?? "";
-
-          return (
-            <div
-              key={annonce.id}
-              className="group relative overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 lg:mx-auto w-full lg:flex lg:h-72"
-            >
-              <div className="lg:w-1/3 lg:flex-shrink-0 lg:h-auto">
-                <div className="h-full">
-                  <ImageCarousel images={annonce.photos || []} />
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-5 lg:w-2/3 flex flex-col">
-                {/* Header: Type et Ville à gauche, Prix à droite */}
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      {type}
-                    </h3>
-                    <p className="text-sm text-gray-600">{ville}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-indigo-600">
-                      {prixFormate}
-                    </div>
-                    {annonce.prix && annonce.prix.includes('+') && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        {annonce.prix}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Description */}
-                {annonce.description && (
-                  <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-grow">
-                    {annonce.description}
-                  </p>
-                )}
-
-                {/* Propriétés */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {isValidNumber(annonce.pieces) && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-sm">
-                      <span>🛏️</span>
-                      <span>{annonce.pieces} pièces</span>
-                    </span>
-                  )}
-                  {isValidNumber(annonce.surface) && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-sm">
-                      <span>📐</span>
-                      <span>{annonce.surface} m²</span>
-                    </span>
-                  )}
-                </div>
-
-                {/* Footer: Agence à gauche, Date à droite */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                  <div className="flex items-center gap-2">
-                    {annonce.agence && (
-                      <span className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 px-3 py-1 text-xs font-medium">
-                        {annonce.agence}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {annonce.created_at && (
-                      <span className="text-xs text-gray-500">
-                        {new Date(annonce.created_at).toLocaleDateString('fr-FR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                        })}
-                      </span>
-                    )}
-                    <Link
-                      href={`/annonce/${annonce.id}`}
-                      className="inline-flex items-center rounded-full bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
-                    >
-                      Voir le détail
-                      <span className="ml-1">→</span>
-                    </Link>
-                  </div>
-                </div>
+        <div className="space-y-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex gap-4 rounded-2xl bg-white border border-gray-100 p-3 animate-pulse">
+              <div className="w-44 h-32 rounded-xl bg-gray-100 flex-shrink-0" />
+              <div className="flex-1 space-y-2.5 py-1">
+                <div className="h-3.5 bg-gray-100 rounded-full w-1/3" />
+                <div className="h-5 bg-gray-100 rounded-full w-2/3" />
+                <div className="h-3.5 bg-gray-100 rounded-full w-1/2" />
+                <div className="h-3.5 bg-gray-100 rounded-full w-3/4" />
               </div>
             </div>
-          );
-          })}
+          ))}
+        </div>
+      ) : annonces.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-gray-300">
+          <svg className="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <p className="text-base font-medium text-gray-400">Aucune annonce</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {annonces.map((annonce: any) => (
+            <AnnonceCard key={annonce.id} annonce={annonce} />
+          ))}
         </div>
       )}
     </div>
   );
 }
 
+function AnnonceCard({ annonce }: { annonce: any }) {
+  return (
+    <Link
+      href={`/annonce/${annonce.id}`}
+      className="flex gap-5 rounded-2xl bg-white border border-gray-100 p-4 hover:border-gray-300 hover:shadow-sm transition-all duration-150 group"
+    >
+      {/* Image */}
+      <div className="relative w-96 h-72 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+        <ImageCarousel images={annonce.photos || []} />
+        {annonce.type && (
+          <span className="absolute top-2 left-2 z-10 rounded-md bg-black/50 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white">
+            {annonce.type}
+          </span>
+        )}
+      </div>
+
+      {/* Contenu */}
+      <div className="flex flex-col flex-1 min-w-0 py-1">
+        {/* Prix + ville */}
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <span className="text-2xl font-bold text-indigo-600 leading-tight">
+            {formatPrix(annonce.prix)}
+          </span>
+          {annonce.ville && (
+            <span className="flex items-center gap-1 text-sm font-medium text-gray-500 flex-shrink-0 mt-1">
+              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {annonce.ville}
+            </span>
+          )}
+        </div>
+
+        {/* Pièces + surface */}
+        {(isValidNumber(annonce.pieces) || isValidNumber(annonce.surface)) && (
+          <div className="flex items-center gap-2 mb-3">
+            {isValidNumber(annonce.pieces) && (
+              <span className="inline-flex items-center rounded-md bg-violet-50 px-2.5 py-1 text-sm font-semibold text-violet-700">
+                {annonce.pieces} pièce{annonce.pieces > 1 ? 's' : ''}
+              </span>
+            )}
+            {isValidNumber(annonce.surface) && (
+              <span className="inline-flex items-center rounded-md bg-sky-50 px-2.5 py-1 text-sm font-semibold text-sky-700">
+                {annonce.surface} m²
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Description */}
+        {annonce.description && (
+          <p className="text-sm text-gray-400 line-clamp-2 leading-relaxed flex-1">
+            {annonce.description}
+          </p>
+        )}
+
+        {/* Footer */}
+        <div className="flex items-center gap-2 mt-auto pt-2">
+          {annonce.agence && (
+            <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-sm font-medium text-emerald-700 truncate">
+              {annonce.agence}
+            </span>
+          )}
+          {annonce.created_at && (
+            <span className="text-sm text-gray-400 flex-shrink-0 ml-auto">
+              {new Date(annonce.created_at).toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              })}
+            </span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function isValidNumber(value: unknown) {
-  return typeof value === "number" && !Number.isNaN(value);
+  return typeof value === 'number' && !Number.isNaN(value);
 }
 
 function formatPrix(prix: any) {
-  if (typeof prix === "number") {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "EUR",
+  if (typeof prix === 'number') {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR',
       maximumFractionDigits: 0,
     }).format(prix);
   }
-  if (typeof prix === "string") {
-    const numeric = Number(prix.replace(/[^0-9]/g, ""));
+  if (typeof prix === 'string') {
+    const numeric = Number(prix.replace(/[^0-9]/g, ''));
     if (!Number.isNaN(numeric)) {
-      return new Intl.NumberFormat("fr-FR", {
-        style: "currency",
-        currency: "EUR",
+      return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: 'EUR',
         maximumFractionDigits: 0,
       }).format(numeric);
     }
   }
-  return prix ?? "Prix ND";
+  return prix ?? 'Prix ND';
 }
