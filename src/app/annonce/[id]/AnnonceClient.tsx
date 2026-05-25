@@ -37,6 +37,23 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
   const { searchParams } = useSearch();
   const router = useRouter();
 
+  useEffect(() => {
+    if (!annonceId) return;
+
+    const fetchAnnonce = async () => {
+      try {
+        const data = await getAnnonceById(annonceId);
+        setAnnonce(data);
+      } catch (error) {
+        console.error('Error fetching annonce:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnnonce();
+  }, [annonceId]);
+
   if (!annonceId) {
     return (
       <div className="text-center py-12">
@@ -87,27 +104,6 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
   };
 
 
-  useEffect(() => {
-    if (!annonceId) return;
-    
-    const fetchAnnonce = async () => {
-      try {
-        const data = await getAnnonceById(annonceId);
-        setAnnonce(data);
-      } catch (error) {
-        console.error('Error fetching annonce:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAnnonce();
-    
-    // Nettoyage
-    return () => {
-      // Annuler les requêtes en cours si nécessaire
-    };
-  }, [annonceId]);
 
   if (loading) {
     return (
