@@ -27,6 +27,16 @@ interface AnnonceClientProps {
 }
 
 export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
+  const [annonce, setAnnonce] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [dpeResults, setDpeResults] = useState<DpeData[]>([]);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof DpeData | null; direction: 'asc' | 'desc' }>({
+    key: null,
+    direction: 'asc'
+  });
+  const { searchParams } = useSearch();
+  const router = useRouter();
+
   if (!annonceId) {
     return (
       <div className="text-center py-12">
@@ -34,15 +44,6 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
       </div>
     );
   }
-  const [annonce, setAnnonce] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [dpeResults, setDpeResults] = useState<DpeData[]>([]);
-  const [sortConfig, setSortConfig] = useState<{ key: keyof DpeData | null; direction: 'asc' | 'desc' }>({ 
-    key: null, 
-    direction: 'asc' 
-  });
-  const { searchParams } = useSearch();
-  const router = useRouter();
 
   const requestSort = (key: keyof DpeData) => {
     let direction: 'asc' | 'desc' = 'asc';
