@@ -139,8 +139,8 @@ export default function Locations() {
       {loading ? (
         <div className="space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex gap-4 rounded-2xl bg-white border border-gray-100 p-3 animate-pulse">
-              <div className="w-44 h-32 rounded-xl bg-gray-100 flex-shrink-0" />
+            <div key={i} className="flex flex-col sm:flex-row gap-4 rounded-2xl bg-white border border-gray-100 p-3 animate-pulse">
+              <div className="w-full h-40 sm:w-44 sm:h-32 rounded-xl bg-gray-100 flex-shrink-0" />
               <div className="flex-1 space-y-2.5 py-1">
                 <div className="h-3.5 bg-gray-100 rounded-full w-1/3" />
                 <div className="h-5 bg-gray-100 rounded-full w-2/3" />
@@ -203,10 +203,10 @@ function AnnonceLocationCard({ annonce, isFavori }: { annonce: any; isFavori: bo
   return (
     <Link
       href={`/location/${annonce.id}`}
-      className="flex gap-5 rounded-2xl bg-white border border-gray-100 p-4 hover:border-gray-300 hover:shadow-sm transition-all duration-150 group"
+      className="flex flex-col sm:flex-row gap-4 sm:gap-5 rounded-2xl bg-white border border-gray-100 p-3 sm:p-4 hover:border-gray-300 hover:shadow-sm transition-all duration-150 group"
     >
       {/* Image */}
-      <div className="relative w-96 h-72 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+      <div className="relative w-full h-56 sm:w-72 sm:h-56 md:w-96 md:h-72 sm:flex-shrink-0 rounded-xl overflow-hidden bg-gray-100">
         <ImageCarousel images={annonce.photos || []} />
         {annonce.type && (
           <span className="absolute top-2 left-2 z-10 rounded-md bg-black/50 backdrop-blur-sm px-2.5 py-1 text-xs font-medium text-white">

@@ -10,6 +10,7 @@ import { getAnnonceById, getFavoriStatus } from "@/app/actions";
 import PrixNegocie from "@/components/PrixNegocie";
 import FavoriButton from "@/components/FavoriButton";
 import ContacteButton from "@/components/ContacteButton";
+import { formatPrix, parseMontant } from "@/lib/formatters";
 
 interface DpeData {
   numero_dpe: string;
@@ -164,7 +165,7 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
         </div>
         
         <div className="w-full md:w-1/2">
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
             <div>
               <h2 className="text-2xl font-bold">
                 {annonce.type} - {annonce.ville}
@@ -178,13 +179,18 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
             <div className="flex items-start gap-3">
               <div className="text-right">
                 <p className="text-2xl font-semibold text-indigo-600">
-                  {annonce.prix ? annonce.prix.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " €" : "Prix non disponible"}
+                  {annonce.prix ? formatPrix(annonce.prix) : "Prix non disponible"}
                 </p>
-                {annonce.prix && annonce.surface && (
-                  <p className="text-sm text-gray-600">
-                    ({Math.round(parseInt(annonce.prix.replace(/[^\d]/g, "")) / parseFloat(annonce.surface)).toLocaleString("fr-FR")} €/m²)
-                  </p>
-                )}
+                {(() => {
+                  const prixNumeric = parseMontant(annonce.prix);
+                  const surfaceNumeric = parseMontant(annonce.surface);
+                  if (!prixNumeric || !surfaceNumeric) return null;
+                  return (
+                    <p className="text-sm text-gray-600">
+                      ({Math.round(prixNumeric / surfaceNumeric).toLocaleString("fr-FR")} €/m²)
+                    </p>
+                  );
+                })()}
               </div>
               <FavoriButton
                 annonceId={parseInt(annonceId)}

@@ -9,6 +9,7 @@ import { EnergyLabels } from "@/components/EnergyLabel";
 import { getAnnonceLocationById, getAnnoncesLocationSimilaires, getFavoriStatus } from "@/app/actions";
 import FavoriButton from "@/components/FavoriButton";
 import ContacteButton from "@/components/ContacteButton";
+import { formatMontant } from "@/lib/formatters";
 
 interface DpeData {
   numero_dpe: string;
@@ -166,7 +167,7 @@ export default function LocationClient({ annonceId }: LocationClientProps) {
         </div>
 
         <div className="w-full md:w-1/2">
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
             <div>
               <h2 className="text-2xl font-bold">
                 {annonce.type} - {annonce.ville}
@@ -180,11 +181,11 @@ export default function LocationClient({ annonceId }: LocationClientProps) {
             <div className="flex items-start gap-3">
               <div className="text-right">
                 <p className="text-2xl font-semibold text-indigo-600">
-                  {annonce.loyer ? `${annonce.loyer.replace(/\B(?=(\d{3})+(?!\d))/g, " ")} €/mois` : "Loyer non disponible"}
+                  {annonce.loyer ? `${formatMontant(annonce.loyer)}/mois` : "Loyer non disponible"}
                 </p>
                 {annonce.charges && (
                   <p className="text-sm text-gray-600">
-                    + {annonce.charges.replace(/\B(?=(\d{3})+(?!\d))/g, " ")} € de charges
+                    + {formatMontant(annonce.charges)} de charges
                   </p>
                 )}
               </div>

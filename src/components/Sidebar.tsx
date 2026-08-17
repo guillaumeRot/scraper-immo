@@ -56,7 +56,8 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <aside className="group/sidebar flex-shrink-0 w-14 hover:w-52 transition-[width] duration-200 ease-in-out bg-white border-r border-gray-100 flex flex-col overflow-hidden z-10">
+      {/* Sidebar desktop */}
+      <aside className="group/sidebar hidden md:flex flex-shrink-0 w-14 hover:w-52 transition-[width] duration-200 ease-in-out bg-white border-r border-gray-100 flex-col overflow-hidden z-10">
         {/* Logo */}
         <div className="h-16 flex items-center px-4 border-b border-gray-100">
           <span className="text-xl leading-none flex-shrink-0">🏠</span>
@@ -89,9 +90,34 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
         </nav>
       </aside>
 
-      <main className="flex-1 p-6 overflow-auto min-w-0">
+      {/* En-tête mobile */}
+      <header className="md:hidden fixed top-0 inset-x-0 z-20 h-14 flex items-center px-4 bg-white border-b border-gray-100">
+        <span className="text-xl leading-none flex-shrink-0">🏠</span>
+        <span className="ml-2 text-indigo-600 font-semibold text-sm">Immo App</span>
+      </header>
+
+      <main className="flex-1 p-4 pt-20 pb-24 sm:p-6 sm:pt-24 md:pt-6 md:pb-6 overflow-x-hidden min-w-0">
         {children}
       </main>
+
+      {/* Barre de navigation mobile */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-20 flex items-stretch justify-around bg-white border-t border-gray-100 pb-[env(safe-area-inset-bottom)]">
+        {NAV_ITEMS.map((item) => {
+          const active = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 transition-colors duration-150 ${
+                active ? "text-indigo-600" : "text-gray-400"
+              }`}
+            >
+              {item.icon}
+              <span className="text-[11px] font-medium leading-none">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }
