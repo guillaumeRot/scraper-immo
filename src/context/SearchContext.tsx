@@ -5,7 +5,9 @@ import { createContext, useContext, ReactNode, useState } from 'react';
 type SearchParams = {
   ville?: string;
   type?: string;
+  agence?: string;
   sort?: string;
+  page?: string;
 };
 
 type SearchContextType = {

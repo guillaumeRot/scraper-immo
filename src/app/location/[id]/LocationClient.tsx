@@ -129,7 +129,9 @@ export default function LocationClient({ annonceId }: LocationClientProps) {
     const params = new URLSearchParams();
     if (searchParams.ville) params.append('ville', searchParams.ville);
     if (searchParams.type) params.append('type', searchParams.type);
+    if (searchParams.agence) params.append('agence', searchParams.agence);
     if (searchParams.sort) params.append('sort', searchParams.sort);
+    if (searchParams.page) params.append('page', searchParams.page);
     return `/locations?${params.toString()}`;
   };
 

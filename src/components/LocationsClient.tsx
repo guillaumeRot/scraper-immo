@@ -23,22 +23,36 @@ export default function Locations() {
 
   const ville = searchParams.get('ville') || '';
   const type = searchParams.get('type') || '';
+  const agence = searchParams.get('agence') || '';
   const sort = searchParams.get('sort') || 'created_at-desc';
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
   const [sortBy, sortOrder] = sort.split('-').slice(-2) as [string, 'asc' | 'desc'];
 
   useEffect(() => {
-    setSearchParams({ ville, type, sort });
-  }, [ville, type, sort, setSearchParams]);
+    setSearchParams({ ville, type, agence, sort, page: String(page) });
+  }, [ville, type, agence, sort, page, setSearchParams]);
 
+  // Change un filtre et revient à la première page
   const setFilter = useCallback((key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (value) params.set(key, value);
     else params.delete(key);
+    params.delete('page');
     router.push(`/locations?${params.toString()}`);
   }, [searchParams, router]);
 
+  const goToPage = useCallback((targetPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (targetPage > 1) params.set('page', String(targetPage));
+    else params.delete('page');
+    router.push(`/locations?${params.toString()}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [searchParams, router]);
+
   const [annonces, setAnnonces] = useState<any[]>([]);
-  const [filters, setFilters] = useState<{ villes: string[]; types: string[] }>({ villes: [], types: [] });
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [filters, setFilters] = useState<{ villes: string[]; types: string[]; agences: string[] }>({ villes: [], types: [], agences: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,10 +60,12 @@ export default function Locations() {
       setLoading(true);
       try {
         const [annoncesData, filtersData] = await Promise.all([
-          getAnnoncesLocation({ ville, type, sortBy: sortBy as any, sortOrder }),
+          getAnnoncesLocation({ ville, type, agence, sortBy: sortBy as any, sortOrder, page }),
           getFiltersDataLocation(),
         ]);
-        setAnnonces(annoncesData);
+        setAnnonces(annoncesData.annonces);
+        setTotal(annoncesData.total);
+        setTotalPages(annoncesData.totalPages);
         setFilters(filtersData);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -58,7 +74,7 @@ export default function Locations() {
       }
     };
     fetchData();
-  }, [ville, type, sortBy, sortOrder]);
+  }, [ville, type, agence, sortBy, sortOrder, page]);
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -66,7 +82,7 @@ export default function Locations() {
       <div className="mb-6 pl-4 border-l-4 border-indigo-500">
         <h2 className="text-2xl font-bold text-gray-900">Annonces de location</h2>
         <p className="text-sm text-gray-400 mt-0.5">
-          {loading ? 'Chargement…' : `${annonces.length} résultat${annonces.length > 1 ? 's' : ''}`}
+          {loading ? 'Chargement…' : `${total} résultat${total > 1 ? 's' : ''}`}
         </p>
       </div>
 
@@ -90,6 +106,17 @@ export default function Locations() {
             <Chip label="Tous" active={!type} onClick={() => setFilter('type', '')} />
             {filters.types.map((t) => (
               <Chip key={t} label={t} active={type === t} onClick={() => setFilter('type', t)} />
+            ))}
+          </div>
+        )}
+
+        {/* Agences */}
+        {filters.agences.length > 0 && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Agence</span>
+            <Chip label="Toutes" active={!agence} onClick={() => setFilter('agence', '')} />
+            {filters.agences.map((a) => (
+              <Chip key={a} label={a} active={agence === a} onClick={() => setFilter('agence', a)} />
             ))}
           </div>
         )}
@@ -126,12 +153,43 @@ export default function Locations() {
           <p className="text-base font-medium text-gray-400">Aucune annonce</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {annonces.map((annonce: any) => (
-            <AnnonceLocationCard key={annonce.id} annonce={annonce} />
-          ))}
-        </div>
+        <>
+          <div className="space-y-3">
+            {annonces.map((annonce: any) => (
+              <AnnonceLocationCard key={annonce.id} annonce={annonce} />
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
+          )}
+        </>
       )}
+    </div>
+  );
+}
+
+function Pagination({ page, totalPages, onPageChange }: { page: number; totalPages: number; onPageChange: (page: number) => void }) {
+  return (
+    <div className="flex items-center justify-center gap-2 mt-8">
+      <button
+        type="button"
+        disabled={page <= 1}
+        onClick={() => onPageChange(page - 1)}
+        className="rounded-full px-3.5 py-1.5 text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-600 disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-600 disabled:cursor-not-allowed transition-all duration-150"
+      >
+        Précédent
+      </button>
+      <span className="text-sm text-gray-500 px-2">
+        Page {page} / {totalPages}
+      </span>
+      <button
+        type="button"
+        disabled={page >= totalPages}
+        onClick={() => onPageChange(page + 1)}
+        className="rounded-full px-3.5 py-1.5 text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-600 disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-600 disabled:cursor-not-allowed transition-all duration-150"
+      >
+        Suivant
+      </button>
     </div>
   );
 }
