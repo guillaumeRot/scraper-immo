@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useSearch } from "@/context/SearchContext";
 import ImageSlider from "@/components/ImageSlider";
 import { EnergyLabels } from "@/components/EnergyLabel";
-import { getAnnonceLocationById } from "@/app/actions";
+import { getAnnonceLocationById, getAnnoncesLocationSimilaires } from "@/app/actions";
 
 interface DpeData {
   numero_dpe: string;
@@ -28,6 +28,7 @@ interface LocationClientProps {
 export default function LocationClient({ annonceId }: LocationClientProps) {
   const [annonce, setAnnonce] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [autresSources, setAutresSources] = useState<any[]>([]);
   const [dpeResults, setDpeResults] = useState<DpeData[]>([]);
   const [sortConfig, setSortConfig] = useState<{ key: keyof DpeData | null; direction: 'asc' | 'desc' }>({
     key: null,
@@ -41,8 +42,12 @@ export default function LocationClient({ annonceId }: LocationClientProps) {
 
     const fetchAnnonce = async () => {
       try {
-        const data = await getAnnonceLocationById(annonceId);
+        const [data, similaires] = await Promise.all([
+          getAnnonceLocationById(annonceId),
+          getAnnoncesLocationSimilaires(annonceId),
+        ]);
         setAnnonce(data);
+        setAutresSources(similaires);
       } catch (error) {
         console.error('Error fetching annonce:', error);
       } finally {
@@ -190,6 +195,29 @@ export default function LocationClient({ annonceId }: LocationClientProps) {
             >
               Voir l'annonce originale →
             </a>
+
+            {autresSources.length > 0 && (
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Également publiée par {autresSources.length} autre{autresSources.length > 1 ? 's' : ''} source{autresSources.length > 1 ? 's' : ''}
+                </h3>
+                <ul className="space-y-2">
+                  {autresSources.map((source) => (
+                    <li key={source.id}>
+                      <a
+                        href={source.lien}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm hover:bg-gray-100 transition-colors duration-150"
+                      >
+                        <span className="font-medium text-gray-700">{source.agence}</span>
+                        <span className="text-indigo-600">Voir →</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>
