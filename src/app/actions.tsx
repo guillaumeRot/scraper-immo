@@ -49,6 +49,104 @@ export async function getAnnonces(
   return annonces;
 }
 
+// Liste des annonces de location avec filtres optionnels
+type SortFieldLocation = 'created_at' | 'loyer';
+
+export async function getAnnoncesLocation(
+  filters?: {
+    ville?: string;
+    type?: string;
+    sortBy?: SortFieldLocation;
+    sortOrder?: SortOrder;
+  }
+) {
+  const where: any = {};
+  if (filters?.ville && filters.ville.trim().length > 0) {
+    where.ville = { contains: filters.ville.trim(), mode: "insensitive" };
+  }
+  if (filters?.type && filters.type.trim().length > 0) {
+    where.type = { equals: filters.type.trim(), mode: "insensitive" };
+  }
+
+  const sortField = filters?.sortBy || 'date_scraped';
+  const sortOrder = filters?.sortOrder || 'desc';
+
+  const annonces = await prisma.annonceLocation.findMany({
+    where,
+    select: {
+      id: true,
+      type: true,
+      loyer: true,
+      charges: true,
+      ville: true,
+      pieces: true,
+      surface: true,
+      lien: true,
+      agence: true,
+      description: true,
+      photos: true,
+      date_scraped: true,
+      created_at: true
+    },
+    orderBy: {
+      [sortField]: sortOrder,
+    },
+    take: 50,
+  });
+  return annonces;
+}
+
+// Récupérer une annonce de location par id
+export async function getAnnonceLocationById(id: string) {
+  const annonce = await prisma.annonceLocation.findUnique({
+    where: {
+      id: parseInt(id),
+    },
+    select: {
+      id: true,
+      type: true,
+      loyer: true,
+      charges: true,
+      ville: true,
+      pieces: true,
+      surface: true,
+      lien: true,
+      agence: true,
+      description: true,
+      photos: true,
+      dpe: true,
+      ges: true,
+    },
+  });
+  return annonce;
+}
+
+// Villes et types distincts pour les filtres de location
+export async function getFiltersDataLocation() {
+  const villes = await prisma.annonceLocation.findMany({
+    distinct: ["ville"],
+    select: { ville: true },
+    where: { ville: { not: null } },
+    orderBy: { ville: "asc" },
+  });
+
+  const types = await prisma.annonceLocation.findMany({
+    distinct: ["type"],
+    select: { type: true },
+    where: { type: { not: null } },
+    orderBy: { type: "asc" },
+  });
+
+  return {
+    villes: villes
+      .map((v) => v.ville)
+      .filter((v): v is string => Boolean(v && v.trim().length > 0)),
+    types: types
+      .map((t) => t.type)
+      .filter((t): t is string => Boolean(t && t.trim().length > 0)),
+  };
+}
+
 // Récupérer une annonce par id
 export async function getAnnonceById(id: string) {
   const annonce = await prisma.annonce.findUnique({

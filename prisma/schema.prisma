@@ -24,6 +24,24 @@ model Annonce {
   date_scraped DateTime @default(now())
 }
 
+model AnnonceLocation {
+  id           Int      @id @default(autoincrement())
+  type         String?  @db.VarChar(255)
+  loyer        String?  @db.VarChar(100)
+  charges      String?  @db.VarChar(100)
+  ville        String?  @db.VarChar(100)
+  pieces       String?  @db.VarChar(50)
+  surface      String?  @db.VarChar(50)
+  lien         String   @unique
+  description  String?
+  photos       Json?
+  agence       String   @db.VarChar(100)
+  dpe          String?  @db.VarChar(1)
+  ges          String?  @db.VarChar(1)
+  created_at   DateTime @default(now())
+  date_scraped DateTime @default(now())
+}
+
 model Scan {
   id            Int      @id @default(autoincrement())
   scraper       String   @db.VarChar(100)
