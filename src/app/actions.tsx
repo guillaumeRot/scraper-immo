@@ -308,3 +308,93 @@ export async function getScans() {
   });
   return scans;
 }
+
+// Favoris (annonces de vente et de location confondues)
+export type AnnonceType = 'vente' | 'location';
+
+export async function toggleFavori(annonceId: number, annonceType: AnnonceType) {
+  const existing = await prisma.favori.findUnique({
+    where: { annonceId_annonceType: { annonceId, annonceType } },
+  });
+  if (existing) {
+    await prisma.favori.delete({ where: { id: existing.id } });
+    return false;
+  }
+  await prisma.favori.create({ data: { annonceId, annonceType } });
+  return true;
+}
+
+// Statut favori + contact d'une annonce (pour les pages détail)
+export async function getFavoriStatus(annonceId: number, annonceType: AnnonceType) {
+  const favori = await prisma.favori.findUnique({
+    where: { annonceId_annonceType: { annonceId, annonceType } },
+  });
+  return { favori: !!favori, contacte: favori?.contacte ?? false };
+}
+
+// Bascule le statut "déjà contacté", uniquement possible si l'annonce est en favori
+export async function toggleContacte(annonceId: number, annonceType: AnnonceType) {
+  const existing = await prisma.favori.findUnique({
+    where: { annonceId_annonceType: { annonceId, annonceType } },
+  });
+  if (!existing) return null;
+  const updated = await prisma.favori.update({
+    where: { id: existing.id },
+    data: { contacte: !existing.contacte },
+  });
+  return updated.contacte;
+}
+
+// Ids favoris d'un type donné (pour marquer les cœurs sur les pages liste)
+export async function getFavorisIds(annonceType: AnnonceType) {
+  const favoris = await prisma.favori.findMany({
+    where: { annonceType },
+    select: { annonceId: true },
+  });
+  return favoris.map((f) => f.annonceId);
+}
+
+// Liste complète des favoris (ventes + locations), triée par date d'ajout
+export async function getFavoris() {
+  const favoris = await prisma.favori.findMany({ orderBy: { created_at: "desc" } });
+  if (favoris.length === 0) return [];
+
+  const venteIds = favoris.filter((f) => f.annonceType === 'vente').map((f) => f.annonceId);
+  const locationIds = favoris.filter((f) => f.annonceType === 'location').map((f) => f.annonceId);
+
+  const [ventes, locations] = await Promise.all([
+    venteIds.length > 0
+      ? prisma.annonce.findMany({
+          where: { id: { in: venteIds } },
+          select: {
+            id: true, type: true, prix: true, ville: true, pieces: true,
+            surface: true, lien: true, agence: true, photos: true,
+          },
+        })
+      : Promise.resolve([]),
+    locationIds.length > 0
+      ? prisma.annonceLocation.findMany({
+          where: { id: { in: locationIds } },
+          select: {
+            id: true, type: true, loyer: true, charges: true, ville: true, pieces: true,
+            surface: true, lien: true, agence: true, photos: true,
+          },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const favoriByKey = new Map(favoris.map((f) => [`${f.annonceType}-${f.annonceId}`, f]));
+
+  const merged = [
+    ...ventes.map((a) => ({ ...a, annonceType: 'vente' as const, ...pickFavoriMeta(favoriByKey, 'vente', a.id) })),
+    ...locations.map((a) => ({ ...a, annonceType: 'location' as const, ...pickFavoriMeta(favoriByKey, 'location', a.id) })),
+  ];
+
+  merged.sort((a, b) => b.favoriDate.getTime() - a.favoriDate.getTime());
+  return merged;
+}
+
+function pickFavoriMeta(favoriByKey: Map<string, { created_at: Date; contacte: boolean }>, type: AnnonceType, id: number) {
+  const favori = favoriByKey.get(`${type}-${id}`)!;
+  return { favoriDate: favori.created_at, contacte: favori.contacte };
+}

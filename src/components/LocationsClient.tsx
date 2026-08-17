@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState, useCallback } from 'react';
-import { getAnnoncesLocation, getFiltersDataLocation } from "../app/actions";
+import { getAnnoncesLocation, getFiltersDataLocation, getFavorisIds } from "../app/actions";
 import ImageCarousel from "@/components/ImageCarousel";
+import FavoriButton from "@/components/FavoriButton";
 import Link from 'next/link';
 import { useSearch } from "@/context/SearchContext";
 import { useSearchParams, useRouter } from 'next/navigation';
+import { isValidNumber, formatLoyer } from "@/lib/formatters";
 
 type SortOption = { value: string; label: string };
 
@@ -53,20 +55,23 @@ export default function Locations() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState<{ villes: string[]; types: string[]; agences: string[] }>({ villes: [], types: [], agences: [] });
+  const [favorisIds, setFavorisIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [annoncesData, filtersData] = await Promise.all([
+        const [annoncesData, filtersData, favorisData] = await Promise.all([
           getAnnoncesLocation({ ville, type, agence, sortBy: sortBy as any, sortOrder, page }),
           getFiltersDataLocation(),
+          getFavorisIds('location'),
         ]);
         setAnnonces(annoncesData.annonces);
         setTotal(annoncesData.total);
         setTotalPages(annoncesData.totalPages);
         setFilters(filtersData);
+        setFavorisIds(new Set(favorisData));
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -156,7 +161,7 @@ export default function Locations() {
         <>
           <div className="space-y-3">
             {annonces.map((annonce: any) => (
-              <AnnonceLocationCard key={annonce.id} annonce={annonce} />
+              <AnnonceLocationCard key={annonce.id} annonce={annonce} isFavori={favorisIds.has(annonce.id)} />
             ))}
           </div>
           {totalPages > 1 && (
@@ -194,7 +199,7 @@ function Pagination({ page, totalPages, onPageChange }: { page: number; totalPag
   );
 }
 
-function AnnonceLocationCard({ annonce }: { annonce: any }) {
+function AnnonceLocationCard({ annonce, isFavori }: { annonce: any; isFavori: boolean }) {
   return (
     <Link
       href={`/location/${annonce.id}`}
@@ -208,6 +213,12 @@ function AnnonceLocationCard({ annonce }: { annonce: any }) {
             {annonce.type}
           </span>
         )}
+        <FavoriButton
+          annonceId={annonce.id}
+          annonceType="location"
+          initialFavori={isFavori}
+          wrapperClassName="absolute top-2 right-2 z-10 bg-black/40 backdrop-blur-sm"
+        />
       </div>
 
       {/* Contenu */}
@@ -287,36 +298,4 @@ function Chip({ label, active, onClick }: { label: string; active: boolean; onCl
       {label}
     </button>
   );
-}
-
-function isValidNumber(value: unknown) {
-  return typeof value === 'number' && !Number.isNaN(value);
-}
-
-function formatMontant(value: any) {
-  if (typeof value === 'number') {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-      maximumFractionDigits: 0,
-    }).format(value);
-  }
-  if (typeof value === 'string') {
-    const numeric = Number(value.replace(/[^0-9]/g, ''));
-    if (!Number.isNaN(numeric)) {
-      return new Intl.NumberFormat('fr-FR', {
-        style: 'currency',
-        currency: 'EUR',
-        maximumFractionDigits: 0,
-      }).format(numeric);
-    }
-  }
-  return null;
-}
-
-function formatLoyer(loyer: any, charges: any) {
-  const loyerFormate = formatMontant(loyer);
-  if (!loyerFormate) return 'Loyer ND';
-  const chargesFormate = formatMontant(charges);
-  return chargesFormate ? `${loyerFormate}/mois + ${chargesFormate} charges` : `${loyerFormate}/mois`;
 }

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState, useCallback } from 'react';
-import { getAnnonces, getFiltersData } from "../app/actions";
+import { getAnnonces, getFiltersData, getFavorisIds } from "../app/actions";
 import ImageCarousel from "@/components/ImageCarousel";
+import FavoriButton from "@/components/FavoriButton";
 import Link from 'next/link';
 import { useSearch } from "@/context/SearchContext";
 import { useSearchParams, useRouter } from 'next/navigation';
+import { isValidNumber, formatPrix } from "@/lib/formatters";
 
 type SortOption = { value: string; label: string };
 
@@ -39,18 +41,21 @@ export default function Home() {
 
   const [annonces, setAnnonces] = useState<any[]>([]);
   const [filters, setFilters] = useState<{ villes: string[]; types: string[] }>({ villes: [], types: [] });
+  const [favorisIds, setFavorisIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [annoncesData, filtersData] = await Promise.all([
+        const [annoncesData, filtersData, favorisData] = await Promise.all([
           getAnnonces({ ville, type, sortBy: sortBy as any, sortOrder }),
           getFiltersData(),
+          getFavorisIds('vente'),
         ]);
         setAnnonces(annoncesData);
         setFilters(filtersData);
+        setFavorisIds(new Set(favorisData));
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -128,7 +133,7 @@ export default function Home() {
       ) : (
         <div className="space-y-3">
           {annonces.map((annonce: any) => (
-            <AnnonceCard key={annonce.id} annonce={annonce} />
+            <AnnonceCard key={annonce.id} annonce={annonce} isFavori={favorisIds.has(annonce.id)} />
           ))}
         </div>
       )}
@@ -136,7 +141,7 @@ export default function Home() {
   );
 }
 
-function AnnonceCard({ annonce }: { annonce: any }) {
+function AnnonceCard({ annonce, isFavori }: { annonce: any; isFavori: boolean }) {
   return (
     <Link
       href={`/annonce/${annonce.id}`}
@@ -150,6 +155,12 @@ function AnnonceCard({ annonce }: { annonce: any }) {
             {annonce.type}
           </span>
         )}
+        <FavoriButton
+          annonceId={annonce.id}
+          annonceType="vente"
+          initialFavori={isFavori}
+          wrapperClassName="absolute top-2 right-2 z-10 bg-black/40 backdrop-blur-sm"
+        />
       </div>
 
       {/* Contenu */}
@@ -229,29 +240,4 @@ function Chip({ label, active, onClick }: { label: string; active: boolean; onCl
       {label}
     </button>
   );
-}
-
-function isValidNumber(value: unknown) {
-  return typeof value === 'number' && !Number.isNaN(value);
-}
-
-function formatPrix(prix: any) {
-  if (typeof prix === 'number') {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-      maximumFractionDigits: 0,
-    }).format(prix);
-  }
-  if (typeof prix === 'string') {
-    const numeric = Number(prix.replace(/[^0-9]/g, ''));
-    if (!Number.isNaN(numeric)) {
-      return new Intl.NumberFormat('fr-FR', {
-        style: 'currency',
-        currency: 'EUR',
-        maximumFractionDigits: 0,
-      }).format(numeric);
-    }
-  }
-  return prix ?? 'Prix ND';
 }

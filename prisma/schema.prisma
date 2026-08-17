@@ -42,6 +42,16 @@ model AnnonceLocation {
   date_scraped DateTime @default(now())
 }
 
+model Favori {
+  id          Int      @id @default(autoincrement())
+  annonceId   Int
+  annonceType String   @db.VarChar(20)
+  contacte    Boolean  @default(false)
+  created_at  DateTime @default(now())
+
+  @@unique([annonceId, annonceType])
+}
+
 model Scan {
   id            Int      @id @default(autoincrement())
   scraper       String   @db.VarChar(100)

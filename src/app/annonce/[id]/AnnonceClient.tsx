@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { useSearch } from "@/context/SearchContext";
 import ImageSlider from "@/components/ImageSlider";
 import { EnergyLabels } from "@/components/EnergyLabel";
-import { getAnnonceById } from "@/app/actions";
+import { getAnnonceById, getFavoriStatus } from "@/app/actions";
 import PrixNegocie from "@/components/PrixNegocie";
+import FavoriButton from "@/components/FavoriButton";
+import ContacteButton from "@/components/ContacteButton";
 
 interface DpeData {
   numero_dpe: string;
@@ -29,6 +31,7 @@ interface AnnonceClientProps {
 export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
   const [annonce, setAnnonce] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [favoriStatus, setFavoriStatus] = useState({ favori: false, contacte: false });
   const [dpeResults, setDpeResults] = useState<DpeData[]>([]);
   const [sortConfig, setSortConfig] = useState<{ key: keyof DpeData | null; direction: 'asc' | 'desc' }>({
     key: null,
@@ -42,8 +45,12 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
 
     const fetchAnnonce = async () => {
       try {
-        const data = await getAnnonceById(annonceId);
+        const [data, status] = await Promise.all([
+          getAnnonceById(annonceId),
+          getFavoriStatus(parseInt(annonceId), 'vente'),
+        ]);
         setAnnonce(data);
+        setFavoriStatus(status);
       } catch (error) {
         console.error('Error fetching annonce:', error);
       } finally {
@@ -168,17 +175,36 @@ export default function AnnonceClient({ annonceId }: AnnonceClientProps) {
                 </p>
               )}
             </div>
-            <div className="text-right">
-              <p className="text-2xl font-semibold text-indigo-600">
-                {annonce.prix ? annonce.prix.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " €" : "Prix non disponible"}
-              </p>
-              {annonce.prix && annonce.surface && (
-                <p className="text-sm text-gray-600">
-                  ({Math.round(parseInt(annonce.prix.replace(/[^\d]/g, "")) / parseFloat(annonce.surface)).toLocaleString("fr-FR")} €/m²)
+            <div className="flex items-start gap-3">
+              <div className="text-right">
+                <p className="text-2xl font-semibold text-indigo-600">
+                  {annonce.prix ? annonce.prix.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " €" : "Prix non disponible"}
                 </p>
-              )}
+                {annonce.prix && annonce.surface && (
+                  <p className="text-sm text-gray-600">
+                    ({Math.round(parseInt(annonce.prix.replace(/[^\d]/g, "")) / parseFloat(annonce.surface)).toLocaleString("fr-FR")} €/m²)
+                  </p>
+                )}
+              </div>
+              <FavoriButton
+                annonceId={parseInt(annonceId)}
+                annonceType="vente"
+                initialFavori={favoriStatus.favori}
+                onToggle={(favori) => setFavoriStatus({ favori, contacte: false })}
+                wrapperClassName="bg-gray-100 hover:bg-gray-200"
+              />
             </div>
           </div>
+
+          {favoriStatus.favori && (
+            <div className="mb-4">
+              <ContacteButton
+                annonceId={parseInt(annonceId)}
+                annonceType="vente"
+                initialContacte={favoriStatus.contacte}
+              />
+            </div>
+          )}
 
           <div className="mt-8">
             <p className="text-gray-700 mb-6">{annonce.description}</p>

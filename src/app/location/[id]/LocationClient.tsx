@@ -6,7 +6,9 @@ import Link from 'next/link';
 import { useSearch } from "@/context/SearchContext";
 import ImageSlider from "@/components/ImageSlider";
 import { EnergyLabels } from "@/components/EnergyLabel";
-import { getAnnonceLocationById, getAnnoncesLocationSimilaires } from "@/app/actions";
+import { getAnnonceLocationById, getAnnoncesLocationSimilaires, getFavoriStatus } from "@/app/actions";
+import FavoriButton from "@/components/FavoriButton";
+import ContacteButton from "@/components/ContacteButton";
 
 interface DpeData {
   numero_dpe: string;
@@ -29,6 +31,7 @@ export default function LocationClient({ annonceId }: LocationClientProps) {
   const [annonce, setAnnonce] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [autresSources, setAutresSources] = useState<any[]>([]);
+  const [favoriStatus, setFavoriStatus] = useState({ favori: false, contacte: false });
   const [dpeResults, setDpeResults] = useState<DpeData[]>([]);
   const [sortConfig, setSortConfig] = useState<{ key: keyof DpeData | null; direction: 'asc' | 'desc' }>({
     key: null,
@@ -42,12 +45,14 @@ export default function LocationClient({ annonceId }: LocationClientProps) {
 
     const fetchAnnonce = async () => {
       try {
-        const [data, similaires] = await Promise.all([
+        const [data, similaires, status] = await Promise.all([
           getAnnonceLocationById(annonceId),
           getAnnoncesLocationSimilaires(annonceId),
+          getFavoriStatus(parseInt(annonceId), 'location'),
         ]);
         setAnnonce(data);
         setAutresSources(similaires);
+        setFavoriStatus(status);
       } catch (error) {
         console.error('Error fetching annonce:', error);
       } finally {
@@ -172,17 +177,36 @@ export default function LocationClient({ annonceId }: LocationClientProps) {
                 </p>
               )}
             </div>
-            <div className="text-right">
-              <p className="text-2xl font-semibold text-indigo-600">
-                {annonce.loyer ? `${annonce.loyer.replace(/\B(?=(\d{3})+(?!\d))/g, " ")} €/mois` : "Loyer non disponible"}
-              </p>
-              {annonce.charges && (
-                <p className="text-sm text-gray-600">
-                  + {annonce.charges.replace(/\B(?=(\d{3})+(?!\d))/g, " ")} € de charges
+            <div className="flex items-start gap-3">
+              <div className="text-right">
+                <p className="text-2xl font-semibold text-indigo-600">
+                  {annonce.loyer ? `${annonce.loyer.replace(/\B(?=(\d{3})+(?!\d))/g, " ")} €/mois` : "Loyer non disponible"}
                 </p>
-              )}
+                {annonce.charges && (
+                  <p className="text-sm text-gray-600">
+                    + {annonce.charges.replace(/\B(?=(\d{3})+(?!\d))/g, " ")} € de charges
+                  </p>
+                )}
+              </div>
+              <FavoriButton
+                annonceId={parseInt(annonceId)}
+                annonceType="location"
+                initialFavori={favoriStatus.favori}
+                onToggle={(favori) => setFavoriStatus({ favori, contacte: false })}
+                wrapperClassName="bg-gray-100 hover:bg-gray-200"
+              />
             </div>
           </div>
+
+          {favoriStatus.favori && (
+            <div className="mb-4">
+              <ContacteButton
+                annonceId={parseInt(annonceId)}
+                annonceType="location"
+                initialContacte={favoriStatus.contacte}
+              />
+            </div>
+          )}
 
           <div className="mt-8">
             <p className="text-gray-700 mb-6">{annonce.description}</p>
