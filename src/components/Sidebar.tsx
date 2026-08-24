@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const NAV_ITEMS = [
   {
     href: "/",
-    label: "Résultats",
+    label: "Ventes",
     icon: (
       <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -57,11 +57,11 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar desktop */}
-      <aside className="group/sidebar hidden md:flex flex-shrink-0 w-14 hover:w-52 transition-[width] duration-200 ease-in-out bg-white border-r border-gray-100 flex-col overflow-hidden z-10">
+      <aside className="hidden md:flex flex-shrink-0 w-52 bg-white border-r border-gray-100 flex-col z-10">
         {/* Logo */}
         <div className="h-16 flex items-center px-4 border-b border-gray-100">
           <span className="text-xl leading-none flex-shrink-0">🏠</span>
-          <span className="ml-3 text-indigo-600 font-semibold text-sm whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 delay-75">
+          <span className="ml-3 text-indigo-600 font-semibold text-sm whitespace-nowrap">
             Immo App
           </span>
         </div>
@@ -81,7 +81,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 }`}
               >
                 {item.icon}
-                <span className="whitespace-nowrap text-sm font-medium opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-150 delay-75">
+                <span className="whitespace-nowrap text-sm font-medium">
                   {item.label}
                 </span>
               </Link>
