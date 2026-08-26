@@ -398,3 +398,37 @@ function pickFavoriMeta(favoriByKey: Map<string, { created_at: Date; contacte: b
   const favori = favoriByKey.get(`${type}-${id}`)!;
   return { favoriDate: favori.created_at, contacte: favori.contacte };
 }
+
+// Réglages d'alertes mail (lus par les crons externes "send-notifications-ventes"/"send-notifications-locations")
+export type TypeTransaction = 'vente' | 'location';
+export type VilleNotification = {
+  villeId: number;
+  nom: string;
+  codePostal: string;
+  vente: boolean;
+  location: boolean;
+};
+
+export async function getNotificationPreferences(): Promise<VilleNotification[]> {
+  const villes = await prisma.villes.findMany({
+    where: { actif: { not: false } },
+    orderBy: { nom: "asc" },
+    include: { notifications: true },
+  });
+
+  return villes.map((v) => ({
+    villeId: v.id,
+    nom: v.nom,
+    codePostal: v.code_postal,
+    vente: v.notifications.find((n) => n.type_transaction === 'vente')?.actif ?? false,
+    location: v.notifications.find((n) => n.type_transaction === 'location')?.actif ?? false,
+  }));
+}
+
+export async function updateNotificationPreference(villeId: number, typeTransaction: TypeTransaction, actif: boolean) {
+  await prisma.notificationPreferences.upsert({
+    where: { ville_id_type_transaction: { ville_id: villeId, type_transaction: typeTransaction } },
+    create: { ville_id: villeId, type_transaction: typeTransaction, actif },
+    update: { actif },
+  });
+}

@@ -52,6 +52,26 @@ model Favori {
   @@unique([annonceId, annonceType])
 }
 
+model Villes {
+  id          Int      @id @default(autoincrement())
+  nom         String   @db.VarChar(100)
+  code_postal String   @db.VarChar(10)
+  actif       Boolean? @default(true)
+
+  notifications NotificationPreferences[]
+}
+
+model NotificationPreferences {
+  id               Int      @id @default(autoincrement())
+  ville_id         Int
+  type_transaction String   @db.VarChar(10)
+  actif            Boolean? @default(true)
+
+  ville Villes @relation(fields: [ville_id], references: [id], onDelete: Cascade)
+
+  @@unique([ville_id, type_transaction])
+}
+
 model Scan {
   id            Int      @id @default(autoincrement())
   scraper       String   @db.VarChar(100)
