@@ -409,6 +409,16 @@ export type VilleNotification = {
   location: boolean;
 };
 
+// Villes actives, utilisées notamment pour peupler les filtres de la page DPE
+export async function getVillesActives(): Promise<string[]> {
+  const villes = await prisma.villes.findMany({
+    where: { actif: { not: false } },
+    orderBy: { nom: "asc" },
+  });
+
+  return villes.map((v) => v.nom);
+}
+
 export async function getNotificationPreferences(): Promise<VilleNotification[]> {
   const villes = await prisma.villes.findMany({
     where: { actif: { not: false } },

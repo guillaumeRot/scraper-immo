@@ -2,20 +2,29 @@
 
 import { DpeData } from './types';
 import { useState, useEffect } from 'react';
+import { getVillesActives } from '../actions';
 
 export default function DpePage() {
-  const VILLES = ["Vitré", "Châteaugiron", "Fougères"];
+  const [villes, setVilles] = useState<string[]>([]);
   const [dpeData, setDpeData] = useState<DpeData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
-  const [selectedCities, setSelectedCities] = useState<string[]>(VILLES);
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [selectedBuildingTypes, setSelectedBuildingTypes] = useState<string[]>(['Appartement', 'Immeuble', 'Maison']);
   const [streetNumber, setStreetNumber] = useState<string>('');
   const [streetName, setStreetName] = useState<string>('');
   const [tempStreetNumber, setTempStreetNumber] = useState<string>('');
   const [tempStreetName, setTempStreetName] = useState<string>('');
+  const [surfaceMin, setSurfaceMin] = useState<string>('');
+  const [surfaceMax, setSurfaceMax] = useState<string>('');
+  const [tempSurfaceMin, setTempSurfaceMin] = useState<string>('');
+  const [tempSurfaceMax, setTempSurfaceMax] = useState<string>('');
+  const [selectedDpeLetters, setSelectedDpeLetters] = useState<string[]>(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
+  const [sortField, setSortField] = useState<string>('date_derniere_modification_dpe');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const BUILDING_TYPES = ['Appartement', 'Immeuble', 'Maison'];
+  const DPE_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
   const fetchData = async (isLoadMore = false) => {
     try {
@@ -35,7 +44,7 @@ export default function DpePage() {
           draft: 'false',
           size: '20',
           truncate: '50',
-          sort: '-date_derniere_modification_dpe',
+          sort: `${sortOrder === 'desc' ? '-' : ''}${sortField}`,
           'nom_commune_ban_in': villesFormatees
         });
 
@@ -52,7 +61,20 @@ export default function DpePage() {
           const typesFormates = selectedBuildingTypes.map(type => `"${type.toLowerCase()}"`).join(',');
           urlParams.append('type_batiment_in', typesFormates);
         }
-        
+
+        if (selectedDpeLetters.length > 0 && selectedDpeLetters.length < DPE_LETTERS.length) {
+          const lettresFormatees = selectedDpeLetters.map(lettre => `"${lettre}"`).join(',');
+          urlParams.append('etiquette_dpe_in', lettresFormatees);
+        }
+
+        if (surfaceMin) {
+          urlParams.append('surface_habitable_logement_gte', surfaceMin);
+        }
+
+        if (surfaceMax) {
+          urlParams.append('surface_habitable_logement_lte', surfaceMax);
+        }
+
         apiUrl = `https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?${urlParams.toString()}`;
       }
       
@@ -72,9 +94,12 @@ export default function DpePage() {
     }
     };
 
-    // Chargement initial des données
+    // Chargement initial des villes disponibles
   useEffect(() => {
-    fetchData();
+    getVillesActives().then((data) => {
+      setVilles(data);
+      setSelectedCities(data);
+    });
   }, []);
 
   // Gestion du changement de sélection des villes
@@ -83,15 +108,6 @@ export default function DpePage() {
       setSelectedCities(prev => [...prev, city]);
     } else {
       setSelectedCities(prev => prev.filter(c => c !== city));
-    }
-  };
-
-  // Gestion de la sélection/désélection de toutes les villes
-  const toggleAllCities = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedCities([...VILLES]);
-    } else {
-      setSelectedCities([]);
     }
   };
 
@@ -104,12 +120,22 @@ export default function DpePage() {
     }
   };
 
-  // Gestion de la sélection/désélection de tous les types de bâtiment
-  const toggleAllBuildingTypes = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedBuildingTypes([...BUILDING_TYPES]);
+  // Gestion du changement de lettre DPE
+  const handleDpeLetterChange = (letter: string, isChecked: boolean) => {
+    if (isChecked) {
+      setSelectedDpeLetters(prev => [...prev, letter]);
     } else {
-      setSelectedBuildingTypes([]);
+      setSelectedDpeLetters(prev => prev.filter(l => l !== letter));
+    }
+  };
+
+  // Gestion du changement de tri
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortOrder('desc');
     }
   };
 
@@ -118,18 +144,22 @@ export default function DpePage() {
     if (selectedCities.length > 0 && selectedBuildingTypes.length > 0) {
       fetchData();
     }
-  }, [selectedCities, selectedBuildingTypes, streetNumber, streetName]);
+  }, [selectedCities, selectedBuildingTypes, selectedDpeLetters, streetNumber, streetName, surfaceMin, surfaceMax, sortField, sortOrder]);
 
   // Initialiser les champs temporaires
   useEffect(() => {
     setTempStreetNumber(streetNumber);
     setTempStreetName(streetName);
+    setTempSurfaceMin(surfaceMin);
+    setTempSurfaceMax(surfaceMax);
   }, []);
 
   // Appliquer les filtres
   const applyFilters = () => {
     setStreetNumber(tempStreetNumber);
     setStreetName(tempStreetName);
+    setSurfaceMin(tempSurfaceMin);
+    setSurfaceMax(tempSurfaceMax);
   };
 
   // Fonction pour charger les résultats suivants
@@ -156,10 +186,10 @@ export default function DpePage() {
           <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Ville</span>
           <Chip
             label="Toutes"
-            active={selectedCities.length === VILLES.length}
-            onClick={() => setSelectedCities([...VILLES])}
+            active={selectedCities.length === villes.length}
+            onClick={() => setSelectedCities(selectedCities.length === villes.length ? [] : [...villes])}
           />
-          {VILLES.map((city) => (
+          {villes.map((city) => (
             <Chip
               key={city}
               label={city}
@@ -175,7 +205,7 @@ export default function DpePage() {
           <Chip
             label="Tous"
             active={selectedBuildingTypes.length === BUILDING_TYPES.length}
-            onClick={() => setSelectedBuildingTypes([...BUILDING_TYPES])}
+            onClick={() => setSelectedBuildingTypes(selectedBuildingTypes.length === BUILDING_TYPES.length ? [] : [...BUILDING_TYPES])}
           />
           {BUILDING_TYPES.map((type) => (
             <Chip
@@ -187,7 +217,25 @@ export default function DpePage() {
           ))}
         </div>
 
-        {/* Adresse */}
+        {/* Classe DPE */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">DPE</span>
+          <Chip
+            label="Toutes"
+            active={selectedDpeLetters.length === DPE_LETTERS.length}
+            onClick={() => setSelectedDpeLetters(selectedDpeLetters.length === DPE_LETTERS.length ? [] : [...DPE_LETTERS])}
+          />
+          {DPE_LETTERS.map((letter) => (
+            <Chip
+              key={letter}
+              label={letter}
+              active={selectedDpeLetters.includes(letter)}
+              onClick={() => handleDpeLetterChange(letter, !selectedDpeLetters.includes(letter))}
+            />
+          ))}
+        </div>
+
+        {/* Adresse et surface */}
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-xs font-medium text-gray-400 w-14 flex-shrink-0">Adresse</span>
           <input
@@ -205,6 +253,22 @@ export default function DpePage() {
             onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
             placeholder="Nom de la rue"
             className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-700 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 w-44"
+          />
+          <input
+            type="number"
+            value={tempSurfaceMin}
+            onChange={(e) => setTempSurfaceMin(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
+            placeholder="Surface min (m²)"
+            className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-700 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 w-36"
+          />
+          <input
+            type="number"
+            value={tempSurfaceMax}
+            onChange={(e) => setTempSurfaceMax(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
+            placeholder="Surface max (m²)"
+            className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-700 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 w-36"
           />
           <button
             onClick={applyFilters}
@@ -225,8 +289,20 @@ export default function DpePage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Surface immeuble (m²)</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classe DPE</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">GES</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date DPE</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date visite</th>
+              <SortableHeader
+                label="Date DPE"
+                field="date_etablissement_dpe"
+                sortField={sortField}
+                sortOrder={sortOrder}
+                onSort={handleSort}
+              />
+              <SortableHeader
+                label="Date visite"
+                field="date_visite_diagnostiqueur"
+                sortField={sortField}
+                sortOrder={sortOrder}
+                onSort={handleSort}
+              />
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nb apparts</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nb niveaux immeuble</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nb niveaux logement</th>
@@ -345,6 +421,35 @@ export default function DpePage() {
         </div>
       )}
     </div>
+  );
+}
+
+function SortableHeader({
+  label,
+  field,
+  sortField,
+  sortOrder,
+  onSort,
+}: {
+  label: string;
+  field: string;
+  sortField: string;
+  sortOrder: 'asc' | 'desc';
+  onSort: (field: string) => void;
+}) {
+  const isActive = sortField === field;
+  return (
+    <th
+      onClick={() => onSort(field)}
+      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700"
+    >
+      <span className="inline-flex items-center gap-1">
+        {label}
+        <span className={isActive ? 'text-indigo-600' : 'text-gray-300'}>
+          {isActive && sortOrder === 'asc' ? '▲' : '▼'}
+        </span>
+      </span>
+    </th>
   );
 }
 
